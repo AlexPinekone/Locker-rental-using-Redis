@@ -1,0 +1,27 @@
+[
+    {
+        "clvuni": "101",
+        "turno": 1,
+        "nombres": "Juan",
+        "ape_pat": "Guerrero",
+        "ape_mat": "Perez",
+        "estado": 0,
+        "locker": "-",
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-03-25 22:54:42",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "124227",
+        "turno": 1,
+        "nombres": "O5E0QFXHTV8SRjo",
+        "ape_pat": "HPfmQsjbFaIX",
+        "ape_mat": "WrIXsAEtHocD",
+        "estado": 1,
+        "locker": "-",
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-03-25 22:55:42",
+        "fecha_hora_asignacion": "-",
+        "fecha_hora_salida": "2026-03-25 22:57:52"
+    }
+]
