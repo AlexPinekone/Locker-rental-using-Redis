@@ -290,6 +290,44 @@ function guardarEnArchivo($nombreArchivo, $datos)
 }
 
 /**
+ * Actualizar el estado de un registro de alumno en el archivo fila.
+ *
+ * @param object $redis - Conexión a Redis
+ * @param string $clvuni - Clave única del alumno
+ * @param int $estado - Nuevo estado a aplicar
+ * @param array $camposExtra - Campos adicionales a actualizar
+ * @return bool - True si se actualizó correctamente
+ * @throws Exception
+ */
+function actualizarEstadoRegistroAlumno($redis, $clvuni, $estado, $camposExtra = [])
+{
+    $fechaHoy = date('Y-m-d');
+    $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
+
+    if (!file_exists($nombreArchivoFila)) {
+        throw new Exception("No se encontró el archivo de fila: " . $nombreArchivoFila);
+    }
+
+    $contenido = file_get_contents($nombreArchivoFila);
+    $datosFila = json_decode($contenido, true) ?: [];
+
+    $resultado = buscarRegistroAlumno($datosFila, $clvuni);
+    if ($resultado['indice'] === null) {
+        throw new Exception("El alumno no se encuentra en la fila");
+    }
+
+    $indice = $resultado['indice'];
+    $datosFila[$indice]['estado'] = intval($estado);
+
+    foreach ($camposExtra as $campo => $valor) {
+        $datosFila[$indice][$campo] = $valor;
+    }
+
+    guardarEnArchivo($nombreArchivoFila, $datosFila);
+    return true;
+}
+
+/**
  * Sacar a un usuario de la cola en Redis
  * 
  * @param object $redis - Conexión a Redis

@@ -23,6 +23,21 @@ try {
     $redis->del($nombreCola);
     $redis->del('contador:turno');
 
+    // Limpiar archivos temporales si existen
+    if (is_dir(LOCKER_TEMP)) {
+        $archivos = scandir(LOCKER_TEMP);
+        foreach ($archivos as $archivo) {
+            if ($archivo === '.' || $archivo === '..') {
+                continue;
+            }
+
+            $rutaArchivo = LOCKER_TEMP . '/' . $archivo;
+            if (is_file($rutaArchivo)) {
+                @unlink($rutaArchivo);
+            }
+        }
+    }
+
     echo json_encode([
         'status'        => 'success',
         'message'       => 'Sistema cerrado correctamente.',

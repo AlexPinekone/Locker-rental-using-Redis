@@ -1,6 +1,3 @@
-// Funciones para Fila Virtual
- 
-
 // Variables globales
 let intervaloTodosRegistros = null;
 let todosLosRegistros = [];
@@ -83,7 +80,8 @@ function cerrarSistemaLockers()
 
     $.post('redis/sistema/cerrar_sistema.php', function(data) 
     {
-        if (data.status === 'success') {
+        if (data.status === 'success') 
+        {
             $('#mensaje-sistema-lockers').html(
                 '<p class="alert alert-danger"> ' + data.message + '</p>'
             );
@@ -95,7 +93,9 @@ function cerrarSistemaLockers()
             $('#btn-cerrar-lockers').prop('disabled', false);
             $('#tabla-proximos-body').html('<tr><td colspan="6" style="text-align:center;">Sistema cerrado</td></tr>');
             $('#total-cola').text('0');
-        } else {
+        } 
+        else 
+        {
             $('#mensaje-sistema-lockers').html(
                 '<p class="alert alert-warning"> ' + data.message + '</p>'
             );
@@ -109,25 +109,29 @@ function cerrarSistemaLockers()
 
 // Funciones de registros
 
-function vincularEventosRegistros() {
+function vincularEventosRegistros() 
+{
     $('#buscar-clvuni').off('input').on('input', function() {
         manejarBusqueda(this.value);
     });
 }
 
-function iniciarActualizacionRegistros() {
+function iniciarActualizacionRegistros() 
+{
     actualizarDatosRegistros();
     intervaloTodosRegistros = setInterval(actualizarDatosRegistros, 5000);
     $('#estado-actualizacion').html('Actualizando automáticamente').css('color', '#009900');
 }
 
-function pausarActualizacionRegistros() {
+function pausarActualizacionRegistros() 
+{
     clearInterval(intervaloTodosRegistros);
     intervaloTodosRegistros = null;
     $('#estado-actualizacion').html('Actualización pausada').css('color', '#e67e22');
 }
 
-function actualizarDatosRegistros() {
+function actualizarDatosRegistros() 
+{
     $.getJSON('redis/consultas/obtener_todos_registros.php', function(data) {
         if (data.status === 'success') {
             todosLosRegistros = data.registros;
@@ -139,8 +143,10 @@ function actualizarDatosRegistros() {
     });
 }
 
-function renderizarTablaRegistros(registros) {
-    if (registros.length === 0) {
+function renderizarTablaRegistros(registros) 
+{
+    if (registros.length === 0) 
+    {
         $('#tabla-todos-registros-body').html(
             '<tr><td colspan="9" style="text-align:center;">No hay registros</td></tr>'
         );
@@ -164,7 +170,8 @@ function renderizarTablaRegistros(registros) {
     $('#tabla-todos-registros-body').html(html);
 }
 
-function manejarBusqueda(valor) {
+function manejarBusqueda(valor) 
+{
     valor = valor.trim();
 
     if (valor === '') {
@@ -180,41 +187,51 @@ function manejarBusqueda(valor) {
             registro.clvuni.toLowerCase().includes(valor.toLowerCase());
     });
 
-    if (filtrados.length === 0) {
+    if (filtrados.length === 0) 
+    {
         $('#tabla-todos-registros-body').html(
             '<tr><td colspan="9" style="text-align:center;">No se encontraron resultados para: <strong>' + valor + '</strong></td></tr>'
         );
-    } else {
+    } 
+    else 
+    {
         renderizarTablaRegistros(filtrados);
     }
 }
 
-function limpiarBusqueda() {
+function limpiarBusqueda() 
+{
     busquedaActiva = false;
     $('#buscar-clvuni').val('');
     renderizarTablaRegistros(todosLosRegistros);
     iniciarActualizacionRegistros();
 }
 
-function obtenerTextoEstado(estado) {
-    switch(estado) {
+function obtenerTextoEstado(estado) 
+{
+    switch(estado) 
+    {
         case 0: return 'Normal';
         case 1: return 'Salida Propia';
-        case 2: return 'Expulsión';
+        case 2: return 'Seleccionando';
+        case 3: return 'Finalizado';
+        case 4: return 'Expulsion';
         default: return 'Desconocido';
     }
 }
 
 // Funciones de componentes
 
-function cargarComponenteColaActiva() {
+function cargarComponenteColaActiva() 
+{
     $.get('componentes/cola_activa.php', function(html) {
         $('#seccion-cola-activa').html(html);
         vincularEventosCola();
     });
 }
 
-function cargarComponenteRegistros() {
+function cargarComponenteRegistros() 
+{
     $.get('componentes/registros_dia.php', function(html) {
         $('#seccion-registros').html(html);
         vincularEventosRegistros();

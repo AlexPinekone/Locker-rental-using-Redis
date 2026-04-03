@@ -18,51 +18,9 @@ date_default_timezone_set('America/Mexico_City');
     <script type="text/javascript" language="javascript" src="<?php echo $adds; ?>/bootstrap-<?php echo $verBSDist; ?>-dist/js/bootstrap.min.js"></script>
     <script type="text/javascript" language="javascript" src="<?php echo $adds; ?>/bootbox.min.js"></script>
     
-    <!-- Scripts de módulos -->
+    <!-- Scripts de módulos Importante-->
     <script type="text/javascript" src="js/fila_virtual.js"></script>
-    <script type="text/javascript" src="js/modulos.js"></script>
-    
-    <style>
-        .botones-menu {
-            margin-top: 20px;
-            margin-bottom: 30px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .btn-modulo {
-            padding: 10px 20px;
-            font-weight: 500;
-        }
-        
-        .btn-modulo.activo {
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-        }
-        
-        .dropdown-menu > li > a {
-            cursor: pointer;
-            padding: 10px 20px;
-        }
-        
-        .dropdown-menu > li > a:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .contenido-modulo {
-            animation: fadeIn 0.3s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-    </style>
+   
 </head>
 
 <body>
@@ -73,36 +31,33 @@ date_default_timezone_set('America/Mexico_City');
             <h1 style="text-align: center; margin-bottom: 30px;">Sistema de Lockers - FCQ</h1>
             
             <!-- Botones de Menú -->
-            <div class="botones-menu">
-                <!-- Botón Química -->
-                <button type="button" class="btn btn-info btn-modulo activo" data-modulo="quimica">
-                    <i class="glyphicon glyphicon-flask"></i> La Química
-                </button>
-                
-                <!-- Botón Desplegable Locker -->
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="glyphicon glyphicon-folder-open"></i> Locker <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="menu-modulo" data-modulo="fila_virtual">
-                            <i class="glyphicon glyphicon-list"></i> Fila Virtual
-                        </a></li>
-                        <li><a class="menu-modulo" data-modulo="renta_locker">
-                            <i class="glyphicon glyphicon-tag"></i> Renta de Locker
-                        </a></li>
-                        <li><a class="menu-modulo" data-modulo="configuracion">
-                            <i class="glyphicon glyphicon-cog"></i> Configuración
-                        </a></li>
-                    </ul>
-                </div>
-            </div>
+            <ul class="nav nav-pills">
+                <li><a href="?modulo=quimica">La Química</a></li>
 
-            <!-- Contenedor de Módulos -->
-            <div id="contenedor-modulos" style="margin-top: 20px; min-height: 400px;">
-                <div id="contenido-actual" class="contenido-modulo">
-                    <p style="text-align: center;">Cargando módulo...</p>
-                </div>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        Locker <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="?modulo=fila_virtual">Fila Virtual</a></li>
+                        <li><a href="?modulo=renta_locker">Renta de Locker</a></li>
+                        <li><a href="?modulo=configuracion">Configuración</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div style="margin-top:20px; min-height:400px;">
+                <?php
+                $modulo = $_GET['modulo'] ?? 'quimica';
+
+                $permitidos = ['quimica', 'fila_virtual', 'renta_locker', 'configuracion'];
+
+                if (in_array($modulo, $permitidos)) {
+                    include "modulos/$modulo.php";
+                } else {
+                    echo "<div class='alert alert-danger'>Módulo no válido</div>";
+                }
+                ?>
             </div>
 
             <!-- Loading -->
@@ -112,12 +67,6 @@ date_default_timezone_set('America/Mexico_City');
                 </div>
             </div>
         </div>
-
-        <script type="text/javascript">
-            // Cargar módulo inicial
-            cargarModulo('quimica');
-        </script>
-
         <?php include($www_footer); ?>
     </div>
 </body>

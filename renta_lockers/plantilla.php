@@ -198,7 +198,7 @@ if ($alumnoLogueado)
                                         <a href="cerrar_sesion.php" class="btn btn-secondary">Salir</a>
                                     `);
                                 }
-                                else if (data.status === 'atendido') 
+                                else if (data.status === 'atendido' || data.status === 'seleccionando') 
                                 {
                                     $('#contenedor-estado').html(`
                                         <p id="atendido" style="color:green; font-weight:bold; font-size:1.5em;">

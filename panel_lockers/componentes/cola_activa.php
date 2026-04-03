@@ -33,14 +33,19 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
     <h4 style="text-align: left; margin-bottom: 15px;">Lista de Espera</h4>
     
     <div style="height: 350px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-        <table class="table table-striped table-hover" style="margin-bottom: 0;">
+        <table class="table table-striped table-hover" style="margin-bottom: 0; table-layout: fixed; width: 100%;">
+            <colgroup>
+                <col style="width: 15%;">
+                <col style="width: 25%;">
+                <col style="width: 35%;">
+                <col style="width: 25%;">
+            </colgroup>
             <thead style="position: sticky; top: 0; background: #f9f9f9; z-index: 10;">
                 <tr>
-                    <th style="border-bottom: 2px solid #ddd;">Turno</th>
-                    <th style="border-bottom: 2px solid #ddd;">Hora Entrada</th>
-                    <th style="border-bottom: 2px solid #ddd;">Clave Única</th>
-                    <th style="border-bottom: 2px solid #ddd;">Locker</th>
-                    <th style="border-bottom: 2px solid #ddd;">Estado</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 15%;">Turno</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 25%;">Hora Entrada</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 35%;">Clave Única</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 25%;">Estado</th>
                 </tr>
             </thead>
             <tbody id="tabla-proximos-body">
@@ -56,34 +61,45 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 </div>
 
 <script type="text/javascript">
-    // Script para cargar datos de la cola cuando este componente se carga
-    $(document).ready(function() {
-        cargarDetallesCola();
-    });
+    let ultimaColaActiva = null;
+    let ultimoTotalCola = null;
 
     function cargarDetallesCola() {
         $.getJSON('redis/consultas/obtener_detalles_fila.php', function(data) {
-            if (data.status === 'success') {
-                $('#total-cola').text(data.total_cola);
-                
-                if (data.detalles.length === 0) {
-                    $('#tabla-proximos-body').html('<tr><td colspan="5" style="text-align: center;">Cola vacía</td></tr>');
-                    $('#btn-atender').prop('disabled', true);
-                } else {
-                    let html = '';
-                    data.detalles.forEach(function(alumno) {
-                        html += '<tr>';
-                        html += '<td>' + alumno.turno + '</td>';
-                        html += '<td>' + alumno.fecha_hora_entrada + '</td>';
-                        html += '<td>' + alumno.clvuni + '</td>';
-                        html += '<td>' + alumno.locker + '</td>';
-                        html += '<td><span class="badge">' + obtenerTextoEstado(alumno.estado) + '</span></td>';
-                        html += '</tr>';
-                    });
-                    $('#tabla-proximos-body').html(html);
-                    $('#btn-atender').prop('disabled', false);
-                }
+            if (data.status !== 'success') {
+                return;
             }
+
+            const detalles = data.detalles || [];
+            const total = data.total_cola || 0;
+            const detallesJSON = JSON.stringify(detalles);
+
+            if (detallesJSON === ultimaColaActiva && total === ultimoTotalCola) {
+                return;
+            }
+
+            ultimaColaActiva = detallesJSON;
+            ultimoTotalCola = total;
+            $('#total-cola').text(total);
+
+            if (detalles.length === 0) {
+                $('#tabla-proximos-body').html('<tr><td colspan="5" style="text-align: center;">Cola vacía</td></tr>');
+                $('#btn-atender').prop('disabled', true);
+            } else {
+                let html = '';
+                detalles.forEach(function(alumno) {
+                    html += '<tr>';
+                    html += '<td>' + alumno.turno + '</td>';
+                    html += '<td>' + alumno.fecha_hora_entrada + '</td>';
+                    html += '<td>' + alumno.clvuni + '</td>';
+                    html += '<td><span class="badge">' + obtenerTextoEstado(alumno.estado) + '</span></td>';
+                    html += '</tr>';
+                });
+                $('#tabla-proximos-body').html(html);
+                $('#btn-atender').prop('disabled', false);
+            }
+        }).fail(function() {
+            $('#tabla-proximos-body').html('<tr><td colspan="5" style="text-align: center;">Error de conexión</td></tr>');
         });
     }
 
@@ -91,7 +107,8 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
         switch(estado) {
             case 0: return 'Normal';
             case 1: return 'Salida Propia';
-            case 2: return 'Expulsión';
+            case 2: return 'Seleccionando';
+            case 3: return 'Finalizado';
             default: return 'Desconocido';
         }
     }

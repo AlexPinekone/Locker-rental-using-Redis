@@ -228,7 +228,7 @@ else
 function registrarTurnoPerdido($numeroTurno, $fechaHoy)
 {
     $carpetaRegistro = LOCKER_LOGS . '/registro';
-    $nombreArchivoTurnosPerdidos = $carpetaTemp . "/turnos_perdidos_{$fechaHoy}.jsonl";
+    $nombreArchivoTurnosPerdidos = $carpetaRegistro . "/turnos_perdidos_{$fechaHoy}.jsonl";
     
     if (!is_dir($carpetaRegistro)) 
     {

@@ -138,13 +138,18 @@ try {
 
     $idReserva = mysqli_insert_id($dbh);
     mysqli_stmt_close($stmtInsertar);
-    
-    // Limpiar sesión de tiempo
-    if (isset($_SESSION['inicio_seleccion'])) {
-        unset($_SESSION['inicio_seleccion']);
-    }
-
     mysqli_close($dbh);
+
+    // Limpiar estado de selección en Redis si existe
+    try {
+        require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
+        if (!isset($error_redis) || !$error_redis) {
+            $claveSeleccionando = 'locker:seleccionando';
+            $redis->hDel($claveSeleccionando, $clvuni);
+        }
+    } catch (Exception $e) {
+        // No interrumpir si Redis falla aquí, la reserva ya fue registrada.
+    }
 
     // ✅ Respuesta exitosa
     echo json_encode([

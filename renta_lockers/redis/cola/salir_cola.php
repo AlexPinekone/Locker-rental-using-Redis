@@ -23,6 +23,10 @@ if ($clvuni)
         
         // Sacar de la cola
         $resultadoSalida = sacarDeColaPorClvuni($redis, $nombreCola, $clvuni_seguro);
+
+        // Si estaba seleccionando, limpiar ese estado
+        $claveSeleccionando = 'locker:seleccionando';
+        $redis->hDel($claveSeleccionando, $clvuni_seguro);
         
         // Registrar en salidas
         registrarSalidas(

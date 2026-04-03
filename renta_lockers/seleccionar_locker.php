@@ -65,23 +65,12 @@ $debug_info = [
 
 mysqli_close($dbh);
 
-$tiempoLimiteSegundos = 120; // 2 minutos
+// Obtener ciclo desde Redis (guardado en abrir_sistema.php)
+require('redis/comun/conexion_redis.php');
 
-if (!isset($_SESSION['inicio_seleccion'])) {
-    $_SESSION['inicio_seleccion'] = time();
-    $segundosRestantes = $tiempoLimiteSegundos;
-} else {
-    $tiempoTranscurrido = time() - $_SESSION['inicio_seleccion'];
-    $segundosRestantes = $tiempoLimiteSegundos - $tiempoTranscurrido;
-}
-
-if ($segundosRestantes <= 0) {
-    unset($_SESSION['inicio_seleccion']);
-    header('Location: dashboard.php?error=tiempo_agotado');
-    exit;
-}
-
-$cicloActual = date('Y');
+$cicloActual = (isset($redis) && (!isset($error_redis) || !$error_redis)) 
+    ? $redis->get('config:ciclo') 
+    : date('Y');
 ?>
 
 <!DOCTYPE HTML>
@@ -209,25 +198,18 @@ $cicloActual = date('Y');
 
     <script>
     const edificiosData = <?php echo json_encode($lockesPorEdificio); ?>;
-    
-    console.log('=== DEBUG LOCKER SELECTION ===');
-    console.log('Tabla usada:', '<?php echo $debug_info['tabla_usada']; ?>');
-    console.log('Cantidad de reservados:', <?php echo $debug_info['cantidad_reservados']; ?>);
-    console.log('Lockers reservados:', <?php echo json_encode($debug_info['ids_reservados']); ?>);
-    
     document.addEventListener('DOMContentLoaded', function() {
         inicializarSeleccionador(
             "<?php echo htmlspecialchars($clvuni); ?>",
             "<?php echo htmlspecialchars($cicloActual); ?>",
             <?php echo json_encode($lockersReservados); ?>,
-            edificiosData,
-            <?php echo $segundosRestantes; ?>
+            edificiosData
         );
     });
 </script>
 
 </body>
 
-<script src="js/plantilla.js?0001"></script>
+<script src="js/plantilla.js?0002"></script>
 
 </html>

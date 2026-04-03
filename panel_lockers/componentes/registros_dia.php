@@ -19,18 +19,29 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
     </div>
     
     <div style="height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
-        <table class="table table-striped table-hover" style="margin-bottom: 0;">
+        <table class="table table-striped table-hover" style="margin-bottom: 0; table-layout: fixed; width: 100%;">
+            <colgroup>
+                <col style="width: 8%;">
+                <col style="width: 12%;">
+                <col style="width: 10%;">
+                <col style="width: 18%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 8%;">
+                <col style="width: 15%;">
+                <col style="width: 5%;">
+            </colgroup>
             <thead style="position: sticky; top: 0; background: #f9f9f9; z-index: 10;">
                 <tr>
-                    <th style="border-bottom: 2px solid #ddd;">Turno</th>
-                    <th style="border-bottom: 2px solid #ddd;">Hora Entrada</th>
-                    <th style="border-bottom: 2px solid #ddd;">Clave Única</th>
-                    <th style="border-bottom: 2px solid #ddd;">Nombres</th>
-                    <th style="border-bottom: 2px solid #ddd;">Ape_pat</th>
-                    <th style="border-bottom: 2px solid #ddd;">Ape_Mat</th>
-                    <th style="border-bottom: 2px solid #ddd;">Locker</th>
-                    <th style="border-bottom: 2px solid #ddd;">Hora Asignación</th>
-                    <th style="border-bottom: 2px solid #ddd;">Estado</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 8%;">Turno</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 12%;">Hora Entrada</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 10%;">Clave Única</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 18%;">Nombres</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 12%;">Ape_pat</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 12%;">Ape_Mat</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 8%;">Locker</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 15%;">Hora Asignación</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 5%;">Estado</th>
                 </tr>
             </thead>
             <tbody id="tabla-todos-registros-body">

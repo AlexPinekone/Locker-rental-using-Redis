@@ -1,8 +1,3 @@
-<?php
-// Este archivo solo contiene HTML
-// Las funciones están en js/fila_virtual.js
-?>
-
 <div style="padding: 20px;">
     <h2>Fila Virtual</h2>
     
@@ -24,7 +19,15 @@
     {
         cargarComponenteColaActiva();
         cargarComponenteRegistros();
-        setInterval(cargarComponenteColaActiva, 2000);
+        setInterval(function() {
+            if (typeof cargarDetallesCola === 'function') {
+                cargarDetallesCola();
+            }
+        }, 2000);
         iniciarActualizacionRegistros();
     }
+
+    $(document).ready(function() {
+        inicializar_fila_virtual();
+    });
 </script>

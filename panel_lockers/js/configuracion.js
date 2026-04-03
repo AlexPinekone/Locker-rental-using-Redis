@@ -110,7 +110,7 @@ function guardarConfiguracion()
         {
             if (data.status === 'success') 
             {
-                mostrarMensaje('success', '✅ Configuración guardada correctamente.');
+                mostrarMensaje('success', ' Configuración guardada correctamente.');
             } 
             else 
             {

@@ -22,6 +22,12 @@ try
         $clvuni = $datosAlumno['clvuni'];
         $turno = $datosAlumno['turno'];
         
+        $claveSeleccionando = 'locker:seleccionando';
+        $redis->hSet($claveSeleccionando, $clvuni, json_encode([
+            'turno' => $turno,
+            'inicio_turno' => time()
+        ]));
+        
         $fechaHoy = date('Y-m-d');
         
         $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
@@ -42,6 +48,9 @@ try
             $registroCompleto = crearNuevoRegistro($clvuni, $turno);
             $indiceRegistro = count($datosFila);
         }
+
+        // Marcar al alumno como en selección de locker
+        $registroCompleto['estado'] = 2;
         
         // Actualizar en el array
         $datosFila[$indiceRegistro] = $registroCompleto;

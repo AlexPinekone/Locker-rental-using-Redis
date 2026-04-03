@@ -13,10 +13,15 @@ $error_msg = false;
 $sistemaCerrado = false;
 $horaApertura = null;
 $fechaApertura = null;
+$estadoAlumno = 'inicio'; // 'inicio', 'cola', 'seleccionando', 'locker_reservado'
+$infoLocker = null;
+$turnoActual = null;
+$posicionEnCola = null;
 
 // Obtener información del sistema (si está abierto y horario)
 require('redis/comun/conexion_redis.php');
 $estadoSistema = $redis->get('config:estado_sistema');
+$clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
 
 if ($estadoSistema !== 'abierto') {
     $sistemaCerrado = true;
@@ -34,11 +39,62 @@ if ($estadoSistema !== 'abierto') {
     }
     
     mysqli_close($dbh);
+} else if ($clvuni) {
+    // Sistema abierto - Verificar estado del alumno
+    
+    // Buscar si tiene locker reservado
+    require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
+    
+    $queryLocker = "SELECT lr.id, lr.id_l, ll.numero, ll.id_a, lr.fecha_r, lr.fecha_c 
+                    FROM plantilla.loc_reserva lr
+                    JOIN plantilla.loc_locker ll ON lr.id_l = ll.id
+                    WHERE lr.clave_unica = ? AND lr.estado = 1 
+                    LIMIT 1";
+    
+    $stmtLocker = mysqli_prepare($dbh, $queryLocker);
+    mysqli_stmt_bind_param($stmtLocker, "s", $clvuni);
+    mysqli_stmt_execute($stmtLocker);
+    $resultLocker = mysqli_stmt_get_result($stmtLocker);
+    
+    if ($resultLocker && mysqli_num_rows($resultLocker) > 0) {
+        $infoLocker = mysqli_fetch_assoc($resultLocker);
+        $estadoAlumno = 'locker_reservado';
+    }
+    
+    mysqli_stmt_close($stmtLocker);
+    mysqli_close($dbh);
+    
+    // Si no tiene locker, buscar si está en la cola
+    if ($estadoAlumno === 'inicio' && isset($redis) && (!isset($error_redis) || !$error_redis)) {
+        require('redis/comun/utils.php');
+
+        // Usar el nombre de cola global definido en conexion_redis.php
+        global $nombreCola;
+
+        $lista = $redis->lRange($nombreCola, 0, -1);
+
+        $usuarioEnCola = false;
+        foreach ($lista as $idx => $item) {
+            $itemDecodificado = json_decode($item, true);
+            if (isset($itemDecodificado['clvuni']) && $itemDecodificado['clvuni'] === $clvuni) {
+                $usuarioEnCola = true;
+                $turnoActual = $itemDecodificado['turno'];
+                $posicionEnCola = $idx;
+
+                // Verificar si está siendo atendido
+                if ($posicionEnCola === 0) {
+                    $estadoAlumno = 'seleccionando';
+                } else {
+                    $estadoAlumno = 'cola';
+                }
+                break;
+            }
+        }
+    }
 }
 
 // Recuperar datos de la sesión
 $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_completo'] : 'Usuario';
-$clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -53,94 +109,42 @@ $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
     
     <script type="text/javascript" language="javascript" src="<?php echo $adds; ?>/bootstrap-<?php echo $verBSDist; ?>-dist/js/bootstrap.min.js"></script>
     <script type="text/javascript" language="javascript" src="<?php echo $adds; ?>/bootbox.min.js"></script>
-    
-    <style>
-        .dashboard-container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 30px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .user-info {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        .user-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        .user-clave {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 15px;
-        }
-        .alert-closed {
-            margin: 20px 0;
-        }
-        .horario-info {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 15px 0;
-        }
-        .horario-info p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        .horario-info strong {
-            color: #856404;
-        }
-        .button-group {
-            margin-top: 30px;
-            text-align: center;
-        }
-        .button-group button, .button-group a {
-            margin: 5px;
-        }
-        .status-open {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .status-closed {
-            color: #dc3545;
-            font-weight: bold;
-        }
-    </style>
 </head>
 
 <body>
     <?php include($www_header); ?>
 
     <div class="container_gral" style="font-family: 'Segoe UI', sans-serif;">
-        <div class="dashboard-container">
+        <div style="max-width: 600px; margin: 40px auto; padding: 30px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             
             <!-- Información del Usuario -->
-            <div class="user-info">
-                <div class="user-name"><?php echo htmlspecialchars($nombreCompleto); ?></div>
-                <div class="user-clave">Clave Única: <?php echo htmlspecialchars($clvuni); ?></div>
+            <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+                <div style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 5px;">
+                    <?php echo htmlspecialchars($nombreCompleto); ?>
+                </div>
+                <div style="font-size: 12px; color: #999; margin-bottom: 15px;">
+                    Clave Única: <?php echo htmlspecialchars($clvuni); ?>
+                </div>
             </div>
 
             <!-- Verificar Estado del Sistema -->
             <?php if ($sistemaCerrado): ?>
                 <!-- Sistema Cerrado -->
-                <div class="alert alert-danger alert-closed">
-                    <h4><span class="status-closed">● Sistema no disponible</span></h4>
+                <div class="alert alert-danger" style="margin: 20px 0;">
+                    <h4>
+                        <span style="color: #dc3545; font-weight: bold;">● Sistema no disponible</span>
+                    </h4>
                     <p>El sistema de renta de lockers aún no ha sido abierto por el administrador.</p>
                 </div>
                 
                 <!-- Mostrar información de apertura si está disponible -->
                 <?php if ($horaApertura && $fechaApertura): ?>
-                    <div class="horario-info">
-                        <p><strong>Horario de apertura:</strong></p>
-                        <p>📅 Fecha: <?php echo htmlspecialchars($fechaApertura); ?></p>
-                        <p>🕐 Hora: <?php echo htmlspecialchars($horaApertura); ?></p>
+                    <div style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 4px; margin: 15px 0;">
+                        <p style="margin: 5px 0; font-size: 14px;">
+                            <strong style="color: #856404;">Horario de apertura:</strong>
+                        </p>
+                        <p>Fecha: <?php echo htmlspecialchars($fechaApertura); ?></p>
+                        <p>Hora: <?php echo htmlspecialchars($horaApertura); ?></p>
                     </div>
                 <?php else: ?>
                     <div class="horario-info">
@@ -149,27 +153,86 @@ $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
                     </div>
                 <?php endif; ?>
                 
-                <div class="button-group">
-                    <a href="cerrar_sesion.php" class="btn btn-secondary">Cerrar Sesión</a>
+                <div style="margin-top: 30px; text-align: center;">
+                    <a href="cerrar_sesion.php" class="btn btn-secondary" style="margin: 5px;">Cerrar Sesión</a>
+                </div>
+
+            <?php elseif ($estadoAlumno === 'locker_reservado'): ?>
+                <!-- Locker ya reservado - Mostrar información y opción de cancelar -->
+                <div class="alert alert-info" style="margin: 20px 0;">
+                    <h4>
+                        <span style="color: #0c5460; font-weight: bold;">✓ Locker Reservado</span>
+                    </h4>
+                    <p>Ya tienes un locker asignado en este ciclo.</p>
+                </div>
+
+                <div style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 4px; margin: 15px 0; text-align: center;">
+                    <p style="font-size: 14px; color: #155724; margin-bottom: 10px;">
+                        <strong>Información del Locker</strong>
+                    </p>
+                    <div style="font-size: 28px; font-weight: bold; color: #155724; margin: 15px 0;">
+                        Locker #<?php echo htmlspecialchars($infoLocker['numero']); ?> - Edificio <?php echo htmlspecialchars($infoLocker['id_a']); ?>
+                    </div>
+                    <p style="font-size: 12px; color: #155724; margin: 5px 0;">
+                        Fecha de reserva: <?php echo htmlspecialchars($infoLocker['fecha_r']); ?>
+                    </p>
+                </div>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="btn btn-danger" onclick="cancelarReservaConfirm()">Cancelar Reserva</button>
+                    <a href="cerrar_sesion.php" class="btn btn-secondary" style="margin-left: 10px;">Cerrar Sesión</a>
+                </div>
+
+            <?php elseif ($estadoAlumno === 'seleccionando'): ?>
+                <!-- Usuario siendo atendido - Redireccionamiento automático a seleccionar locker -->
+                <div class="alert alert-success">
+                    <h4>
+                        <span style="color: #28a745; font-weight: bold;">¡Es tu turno!</span>
+                    </h4>
+                    <p>Redireccionando a la pantalla de selección de lockers...</p>
+                </div>
+                <div style="text-align: center;">
+                    <p style="font-size: 14px; color: #666;">Por favor espera...</p>
+                </div>
+
+            <?php elseif ($estadoAlumno === 'cola'): ?>
+                <!-- Usuario en cola - Mostrar posición -->
+                <div class="alert alert-success">
+                    <h4>
+                        <span style="color: #28a745; font-weight: bold;">● En la fila</span>
+                    </h4>
+                    <p>Estás en la fila virtual de renta de lockers.</p>
+                </div>
+
+                <div id="cola-estado" style="text-align: center; padding: 20px;">
+                    <h3>Tu turno es: <span id="turno" style="font-size: 2em; font-weight: bold; color: #0066cc;">...</span></h3>
+                    <p>Personas delante de ti:</p>
+                    <div id="numero_delante" style="font-size: 2em; font-weight: bold; color: #333;">...</div>
+                    <p style="font-size: 0.8em; color: #666; margin-top: 20px;">La página se actualiza automáticamente. No la cierres.</p>
+                    <div style="margin-top: 30px;">
+                        <button class="btn btn-sm btn-warning" onclick="salirCola()">Salir de la cola</button>
+                        <a href="cerrar_sesion.php" class="btn btn-sm btn-danger">Cerrar Sesión</a>
+                    </div>
                 </div>
 
             <?php else: ?>
-                <!-- Sistema Abierto - Opción de unirse a la cola -->
+                <!-- Estado inicial - Opción de unirse a la cola -->
                 <div class="alert alert-success">
-                    <h4><span class="status-open">● Sistema disponible</span></h4>
-                    <p>Puedes unirte a la cola de renta de lockers.</p>
+                    <h4>
+                        <span style="color: #28a745; font-weight: bold;">Sistema disponible</span>
+                    </h4>
+                    <p>Puedes unirte a la fila virtual de renta de lockers.</p>
                 </div>
 
                 <div id="contenedor-estado" style="text-align: center; padding: 20px;">
-                    <p style="font-size: 16px; margin-bottom: 20px;">¿Deseas unirte a la cola de renta de lockers?</p>
+                    <p style="font-size: 16px; margin-bottom: 20px;">¿Deseas unirte a la fila de renta de lockers?</p>
                     <div class="button-group">
-                        <button class="btn btn-success btn-lg" onclick="unirseAlaCola()">Unirse a la Cola</button>
+                        <button class="btn btn-success btn-lg" onclick="unirseAlaCola()">Unirse a la Fila</button>
                         <a href="cerrar_sesion.php" class="btn btn-secondary">Cerrar Sesión</a>
                     </div>
                 </div>
 
-                <!-- Contenedor para mostrar el estado mientras está en la cola -->
-                <div id="cola-estado" style="display: none; text-align: center; padding: 20px;">
+                <div id="cola-estado" style="display:none; text-align: center; padding: 20px;">
                     <h3>Tu turno es: <span id="turno" style="font-size: 2em; font-weight: bold; color: #0066cc;">...</span></h3>
                     <p>Personas delante de ti:</p>
                     <div id="numero_delante" style="font-size: 2em; font-weight: bold; color: #333;">...</div>
@@ -188,10 +251,30 @@ $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
     </div>
 
     <!-- Script para manejar la cola -->
-    <?php if (!$sistemaCerrado): ?>
     <script>
         const alumnoId = "<?php echo htmlspecialchars($clvuni); ?>";
+        let estadoAlumno = "<?php echo htmlspecialchars($estadoAlumno); ?>";
+        const sistemaCerrado = <?php echo ($sistemaCerrado ? 'true' : 'false'); ?>;
         let intervalo = null;
+
+        // Si está siendo atendido, redirigir automáticamente
+        if (estadoAlumno === 'seleccionando') {
+            setTimeout(() => {
+                window.location.href = 'seleccionar_locker.php';
+            }, 2000);
+        }
+
+        // Si está en cola, iniciar el polling automático
+        if (estadoAlumno === 'cola') {
+            revisarTurno();
+            intervalo = setInterval(() => {
+                if (document.querySelector('#atendido')) {
+                    clearInterval(intervalo);
+                } else {
+                    revisarTurno();
+                }
+            }, 3000);
+        }
 
         function unirseAlaCola() {
             $('#contenedor-estado').hide();
@@ -216,6 +299,7 @@ $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
                         `);
                         return;
                     }
+                    estadoAlumno = 'cola';
                     revisarTurno();
                     intervalo = setInterval(() => {
                         if (document.querySelector('#atendido')) {
@@ -231,34 +315,6 @@ $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
                         <p style="color:red;">Error de conexión. Intenta de nuevo.</p>
                         <a href="dashboard.php" class="btn btn-danger">Volver</a>
                     `);
-                });
-        }
-
-        function revisarTurno() {
-            $.getJSON('redis/cola/consultar_estado.php')
-                .done(function(data) {
-                    if (data.status === 'sistema_cerrado') {
-                        clearInterval(intervalo);
-                        $('#cola-estado').html(`
-                            <div class="alert alert-warning">
-                                <h4>Sistema cerrado</h4>
-                                <p>${data.message}</p>
-                                <p style="font-size:0.85em; color:#666;">Has sido removido de la cola automáticamente.</p>
-                            </div>
-                            <a href="dashboard.php" class="btn btn-secondary">Volver</a>
-                        `);
-                    }
-                    else if (data.status === 'atendido') {
-                        // Redirigir a la pantalla de selección de lockers
-                        window.location.href = 'seleccionar_locker.php';
-                    }
-                    else if (data.status === 'esperando') {
-                        $('#numero_delante').text(data.posicion);
-                        $('#turno').text(data.turno);
-                    }
-                })
-                .fail(function() {
-                    console.error('Error al conectar con el servidor');
                 });
         }
 
@@ -280,9 +336,93 @@ $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
                     });
             }
         }
-    </script>
-    <?php endif; ?>
 
+        function cancelarReservaConfirm() {
+            if (confirm('¿Estás seguro de que deseas cancelar tu reserva? Esta acción no se puede deshacer.')) {
+                $.post('ajax/cancelar_reserva.php')
+                    .done(function(data) {
+                        if (data.status === 'success') {
+                            alert('Tu reserva ha sido cancelada correctamente.');
+                            window.location.href = 'dashboard.php';
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .fail(function() {
+                        alert('Error al conectar con el servidor');
+                    });
+            }
+        }
+
+        function mostrarCola(turno, personasDelante) {
+            $('#contenedor-estado').hide();
+            $('#cola-estado').show();
+            $('#turno').text(turno || '...');
+            $('#numero_delante').text(typeof personasDelante !== 'undefined' ? personasDelante : '...');
+        }
+
+        function ocultarCola() {
+            $('#cola-estado').hide();
+            $('#contenedor-estado').show();
+        }
+
+        function revisarTurno() {
+            $.getJSON('redis/cola/consultar_estado.php')
+                .done(function(data) {
+                    if (data.status === 'sistema_cerrado') {
+                        clearInterval(intervalo);
+                        $('#cola-estado').html(`
+                            <div class="alert alert-warning">
+                                <h4>Sistema cerrado</h4>
+                                <p>${data.message}</p>
+                                <p style="font-size:0.85em; color:#666;">Has sido removido de la cola automáticamente.</p>
+                            </div>
+                            <a href="dashboard.php" class="btn btn-secondary">Volver</a>
+                        `);
+                    }
+                    else if (data.status === 'atendido') {
+                        // Si ya no está en cola, mostrar estado inicial (o redirigir si es tu turno)
+                        ocultarCola();
+                    }
+                    else if (data.status === 'seleccionando') {
+                        window.location.href = 'seleccionar_locker.php';
+                    }
+                    else if (data.status === 'esperando') {
+                        mostrarCola(data.turno, data.personas_delante);
+                    }
+                })
+                .fail(function() {
+                    console.error('Error al conectar con el servidor');
+                });
+        }
+
+        function verificarEstadoInicial() {
+            if (sistemaCerrado || estadoAlumno === 'locker_reservado') {
+                return;
+            }
+
+            $.getJSON('redis/cola/consultar_estado.php')
+                .done(function(data) {
+                    if (data.status === 'esperando') {
+                        mostrarCola(data.turno, data.personas_delante);
+                        if (!intervalo) {
+                            intervalo = setInterval(() => revisarTurno(), 3000);
+                        }
+                    } else if (data.status === 'seleccionando') {
+                        window.location.href = 'seleccionar_locker.php';
+                    } else if (data.status === 'atendido') {
+                        ocultarCola();
+                    }
+                })
+                .fail(function() {
+                    console.error('Error al verificar estado inicial');
+                });
+        }
+
+        $(document).ready(function() {
+            verificarEstadoInicial();
+        });
+    </script>
 </body>
 
 <script type="text/javascript" src="js/plantilla.js?0001"></script>

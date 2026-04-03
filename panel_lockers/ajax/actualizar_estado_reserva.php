@@ -30,14 +30,14 @@ try
     // Determinar qué fecha actualizar según el nuevo estado
     if ($nuevo_estado === 3) 
     {
-        // Pagado → actualizar fecha_p
+        // Pagado: actualizar fecha_p
         $query = "UPDATE plantilla.loc_reserva 
                   SET estado = ?, fecha_p = NOW() 
                   WHERE id = ?";
     } 
     elseif ($nuevo_estado === 2) 
     {
-        // Sin pago → actualizar fecha_c
+        // Sin pago: actualizar fecha_c
         $query = "UPDATE plantilla.loc_reserva 
                   SET estado = ?, fecha_c = NOW() 
                   WHERE id = ?";
