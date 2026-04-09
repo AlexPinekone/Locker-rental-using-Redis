@@ -55,7 +55,7 @@ if ($clvuni)
             $datosSeleccionando = json_decode($seleccionandoJson, true) ?: [];
             $tiempoRestante = null;
 
-            if (isset($datosSeleccionando['inicio_turno'])) 
+            if (isset($datosSeleccionando['inicio_turno']))
             {
                 $tiempoTranscurrido = time() - intval($datosSeleccionando['inicio_turno']);
                 $tiempoRestante = max(0, $tiempoLimite - $tiempoTranscurrido);

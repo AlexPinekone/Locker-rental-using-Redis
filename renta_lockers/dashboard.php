@@ -4,7 +4,8 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 date_default_timezone_set('America/Mexico_City');
 
 // Verificar que el usuario esté logueado
-if (!isset($_SESSION['clvuni'])) {
+if (!isset($_SESSION['clvuni'])) 
+{
     header('Location: login.php');
     exit;
 }
@@ -23,7 +24,8 @@ require('redis/comun/conexion_redis.php');
 $estadoSistema = $redis->get('config:estado_sistema');
 $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
 
-if ($estadoSistema !== 'abierto') {
+if ($estadoSistema !== 'abierto') 
+{
     $sistemaCerrado = true;
     
     // Obtener información de fecha y hora de apertura desde la base de datos
@@ -32,14 +34,17 @@ if ($estadoSistema !== 'abierto') {
     $query = "SELECT fecha_ini, hora_ini FROM loc_config LIMIT 1";
     $result = mysqli_query($dbh, $query);
     
-    if ($result && mysqli_num_rows($result) > 0) {
+    if ($result && mysqli_num_rows($result) > 0) 
+    {
         $row = mysqli_fetch_assoc($result);
         $fechaApertura = $row['fecha_ini'];
         $horaApertura = $row['hora_ini'];
     }
     
     mysqli_close($dbh);
-} else if ($clvuni) {
+} 
+else if ($clvuni) 
+{
     // Sistema abierto - Verificar estado del alumno
     
     // Buscar si tiene locker reservado
@@ -48,7 +53,7 @@ if ($estadoSistema !== 'abierto') {
     $queryLocker = "SELECT lr.id, lr.id_l, ll.numero, ll.id_a, lr.fecha_r, lr.fecha_c 
                     FROM plantilla.loc_reserva lr
                     JOIN plantilla.loc_locker ll ON lr.id_l = ll.id
-                    WHERE lr.clave_unica = ? AND lr.estado = 1 
+                    WHERE lr.clave_unica = ? AND lr.estado IN (1, 2) 
                     LIMIT 1";
     
     $stmtLocker = mysqli_prepare($dbh, $queryLocker);
@@ -56,7 +61,8 @@ if ($estadoSistema !== 'abierto') {
     mysqli_stmt_execute($stmtLocker);
     $resultLocker = mysqli_stmt_get_result($stmtLocker);
     
-    if ($resultLocker && mysqli_num_rows($resultLocker) > 0) {
+    if ($resultLocker && mysqli_num_rows($resultLocker) > 0) 
+    {
         $infoLocker = mysqli_fetch_assoc($resultLocker);
         $estadoAlumno = 'locker_reservado';
     }
@@ -65,7 +71,8 @@ if ($estadoSistema !== 'abierto') {
     mysqli_close($dbh);
     
     // Si no tiene locker, buscar si está en la cola
-    if ($estadoAlumno === 'inicio' && isset($redis) && (!isset($error_redis) || !$error_redis)) {
+    if ($estadoAlumno === 'inicio' && isset($redis) && (!isset($error_redis) || !$error_redis)) 
+    {
         require('redis/comun/utils.php');
 
         // Usar el nombre de cola global definido en conexion_redis.php
@@ -76,15 +83,20 @@ if ($estadoSistema !== 'abierto') {
         $usuarioEnCola = false;
         foreach ($lista as $idx => $item) {
             $itemDecodificado = json_decode($item, true);
-            if (isset($itemDecodificado['clvuni']) && $itemDecodificado['clvuni'] === $clvuni) {
+            if (isset($itemDecodificado['clvuni']) && $itemDecodificado['clvuni'] === $clvuni) 
+            {
                 $usuarioEnCola = true;
                 $turnoActual = $itemDecodificado['turno'];
                 $posicionEnCola = $idx;
 
                 // Verificar si está siendo atendido
-                if ($posicionEnCola === 0) {
+                // CAMBIO
+                if ($posicionEnCola === 0) 
+                {
                     $estadoAlumno = 'seleccionando';
-                } else {
+                } 
+                else 
+                {
                     $estadoAlumno = 'cola';
                 }
                 break;
@@ -152,7 +164,7 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                         <p>Ponte en contacto con el administrador para más detalles.</p>
                     </div>
                 <?php endif; ?>
-                
+                <<!-- QUITAR BOTÓN EN EL FUTURO, no hay que dejar que solo cierren sesion -->
                 <div style="margin-top: 30px; text-align: center;">
                     <a href="cerrar_sesion.php" class="btn btn-secondary" style="margin: 5px;">Cerrar Sesión</a>
                 </div>
@@ -258,25 +270,31 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
         let intervalo = null;
 
         // Si está siendo atendido, redirigir automáticamente
-        if (estadoAlumno === 'seleccionando') {
+        if (estadoAlumno === 'seleccionando') 
+        {
             setTimeout(() => {
                 window.location.href = 'seleccionar_locker.php';
             }, 2000);
         }
 
         // Si está en cola, iniciar el polling automático
-        if (estadoAlumno === 'cola') {
+        if (estadoAlumno === 'cola') 
+        {
             revisarTurno();
             intervalo = setInterval(() => {
-                if (document.querySelector('#atendido')) {
+                if (document.querySelector('#atendido')) 
+                {
                     clearInterval(intervalo);
-                } else {
+                } 
+                else 
+                {
                     revisarTurno();
                 }
             }, 3000);
         }
 
-        function unirseAlaCola() {
+        function unirseAlaCola() 
+        {
             $('#contenedor-estado').hide();
             $('#cola-estado').show();
 
@@ -380,14 +398,17 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                             <a href="dashboard.php" class="btn btn-secondary">Volver</a>
                         `);
                     }
-                    else if (data.status === 'atendido') {
+                    else if (data.status === 'atendido') 
+                    {
                         // Si ya no está en cola, mostrar estado inicial (o redirigir si es tu turno)
                         ocultarCola();
                     }
-                    else if (data.status === 'seleccionando') {
+                    else if (data.status === 'seleccionando') 
+                    {
                         window.location.href = 'seleccionar_locker.php';
                     }
-                    else if (data.status === 'esperando') {
+                    else if (data.status === 'esperando') 
+                    {
                         mostrarCola(data.turno, data.personas_delante);
                     }
                 })
@@ -396,21 +417,29 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                 });
         }
 
-        function verificarEstadoInicial() {
-            if (sistemaCerrado || estadoAlumno === 'locker_reservado') {
+        function verificarEstadoInicial() 
+        {
+            if (sistemaCerrado || estadoAlumno === 'locker_reservado') 
+            {
                 return;
             }
 
             $.getJSON('redis/cola/consultar_estado.php')
                 .done(function(data) {
-                    if (data.status === 'esperando') {
+                    if (data.status === 'esperando') 
+                    {
                         mostrarCola(data.turno, data.personas_delante);
-                        if (!intervalo) {
+                        if (!intervalo) 
+                        {
                             intervalo = setInterval(() => revisarTurno(), 3000);
                         }
-                    } else if (data.status === 'seleccionando') {
+                    } 
+                    else if (data.status === 'seleccionando') 
+                    {
                         window.location.href = 'seleccionar_locker.php';
-                    } else if (data.status === 'atendido') {
+                    } 
+                    else if (data.status === 'atendido') 
+                    {
                         ocultarCola();
                     }
                 })

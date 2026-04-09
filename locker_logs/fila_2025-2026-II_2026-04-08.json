@@ -1,0 +1,111 @@
+[
+    {
+        "clvuni": "101",
+        "turno": 1,
+        "nombres": "Juan",
+        "ape_pat": "Guerrero",
+        "ape_mat": "Perez",
+        "estado": 3,
+        "locker": 2,
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-04-08 18:03:58",
+        "fecha_hora_asignacion": "2026-04-08 18:05:56"
+    },
+    {
+        "clvuni": "202",
+        "turno": 1,
+        "nombres": "Maria",
+        "ape_pat": "Salvador",
+        "ape_mat": "Rodriguez",
+        "estado": 3,
+        "locker": 1,
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-04-08 18:06:06",
+        "fecha_hora_asignacion": "2026-04-08 18:31:22"
+    },
+    {
+        "clvuni": "101232",
+        "turno": 1,
+        "nombres": "7D0yqWfaX6oKt9h",
+        "ape_pat": "AeuyirIaBQdL",
+        "ape_mat": "RtrJAMTnVOBI",
+        "estado": 3,
+        "locker": 7,
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-04-08 18:32:15",
+        "fecha_hora_asignacion": "2026-04-08 18:33:55"
+    },
+    {
+        "clvuni": "101818",
+        "turno": 2,
+        "nombres": "7y6rHANoKJQWSxu",
+        "ape_pat": "RiIXzaWShRqp",
+        "ape_mat": "RWQTKruaelvO",
+        "estado": 3,
+        "locker": 6,
+        "posicion_entrada": 1,
+        "fecha_hora_entrada": "2026-04-08 18:32:34",
+        "fecha_hora_asignacion": "2026-04-08 18:35:54"
+    },
+    {
+        "clvuni": "101631",
+        "turno": 3,
+        "nombres": "ZYyeTmVvaz4xotp",
+        "ape_pat": "PcMimxdoPKZI",
+        "ape_mat": "EuWyqzfKJsik",
+        "estado": 0,
+        "locker": "-",
+        "posicion_entrada": 2,
+        "fecha_hora_entrada": "2026-04-08 18:32:44",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "100273",
+        "turno": 4,
+        "nombres": "RuUK39CXf5OgioZ",
+        "ape_pat": "AhQsTixIjBZm",
+        "ape_mat": "OKLOQIkRYfuc",
+        "estado": 0,
+        "locker": "-",
+        "posicion_entrada": 3,
+        "fecha_hora_entrada": "2026-04-08 18:32:54",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "101232",
+        "turno": 5,
+        "nombres": "7D0yqWfaX6oKt9h",
+        "ape_pat": "AeuyirIaBQdL",
+        "ape_mat": "RtrJAMTnVOBI",
+        "estado": 1,
+        "locker": "-",
+        "posicion_entrada": 3,
+        "fecha_hora_entrada": "2026-04-08 18:34:49",
+        "fecha_hora_asignacion": "-",
+        "fecha_hora_salida": "2026-04-08 18:36:43"
+    },
+    {
+        "clvuni": "101818",
+        "turno": 6,
+        "nombres": "7y6rHANoKJQWSxu",
+        "ape_pat": "RiIXzaWShRqp",
+        "ape_mat": "RWQTKruaelvO",
+        "estado": 0,
+        "locker": "-",
+        "posicion_entrada": 3,
+        "fecha_hora_entrada": "2026-04-08 18:36:03",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "101232",
+        "turno": 7,
+        "nombres": "7D0yqWfaX6oKt9h",
+        "ape_pat": "AeuyirIaBQdL",
+        "ape_mat": "RtrJAMTnVOBI",
+        "estado": 0,
+        "locker": "-",
+        "posicion_entrada": 3,
+        "fecha_hora_entrada": "2026-04-08 18:37:50",
+        "fecha_hora_asignacion": "-"
+    }
+]

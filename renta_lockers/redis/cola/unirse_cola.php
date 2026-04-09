@@ -31,33 +31,51 @@ if ($clvuni)
         // Procesar salidas en fila
         procesarSalidasEnFila($nombreArchivoFila, $nombreArchivoSalidas);
        
-        $estadoExistente   = 0;
-        $registroExistente = buscarRegistroAlumnoCicloCompleto($redis, $clvuni_seguro);
-
-        // Si existe y tiene locker, que no entre
-        if ($registroExistente && isset($registroExistente['locker']) && $registroExistente['locker'] !== '-') 
-        {
+        // Verificar en base de datos si el alumno ya tiene una reserva activa en el ciclo actual
+        require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
+        $ciclo = $redis->get('config:ciclo') ?: 'sin-ciclo';
+        
+        $query = "SELECT estado FROM plantilla.loc_reserva WHERE clave_unica = ? AND ciclo = ? LIMIT 1";
+        $stmt = mysqli_prepare($dbh, $query);
+        mysqli_stmt_bind_param($stmt, "ss", $clvuni_seguro, $ciclo);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $registroBD = mysqli_fetch_assoc($result);
+        mysqli_stmt_close($stmt);
+        mysqli_close($dbh);
+        
+        // Si existe registro en BD y estado es 1 o 2 (reserva activa o pagada), no permitir unirse
+        if ($registroBD && in_array($registroBD['estado'], [1, 2])) {
             echo json_encode([
-                'status'  => 'error', 
-                'message' => 'Ya has recibido un locker. No puedes entrar nuevamente.',
+                'status'  => 'error',
+                'message' => 'Ya tienes una reserva activa en este ciclo. No puedes unirte nuevamente.',
                 'clvuni'  => $clvuni_seguro,
-                'locker'  => $registroExistente['locker']
+                'estado'  => $registroBD['estado']
             ]);
             exit;
         }
-
-        // Si el estado es diferente de 0, crear registro completamente nuevo
-        if ($registroExistente && isset($registroExistente['estado']) && $registroExistente['estado'] !== '0') 
+        
+        // Verificar si ya existe un registro en el archivo fila JSON
+        $registroExistenteJSON = null;
+        if (file_exists($nombreArchivoFila)) 
         {
-            // El usuario tiene un estado diferente (salida, expulsion, etc)
-            // Crear un registro completamente nuevo
-            $registroExistente = null;
-            $estadoExistente = 0;
+            $contenido = file_get_contents($nombreArchivoFila);
+            $datosFila = json_decode($contenido, true) ?: [];
+            $resultado = buscarRegistroAlumno($datosFila, $clvuni_seguro);
+            if ($resultado['registro']) 
+            {
+                $registroExistenteJSON = $resultado['registro'];
+            }
         }
-        else if ($registroExistente && isset($registroExistente['estado'])) 
-        {
-            // Recuperar estado si existe y es 0
-            $estadoExistente = $registroExistente['estado'];
+        
+        if ($registroExistenteJSON && in_array($registroExistenteJSON['estado'], [1, 3, 4, 5])) {
+            // Crear registro completamente nuevo
+            $estadoExistente = 0;
+        } elseif ($registroExistenteJSON) {
+            // Usar el estado del registro existente
+            $estadoExistente = $registroExistenteJSON['estado'];
+        } else {
+            $estadoExistente = 0;
         }
         
         $lista = $redis->lRange($nombreCola, 0, -1);

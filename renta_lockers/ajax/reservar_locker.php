@@ -151,7 +151,7 @@ try {
         // No interrumpir si Redis falla aquí, la reserva ya fue registrada.
     }
 
-    // ✅ Respuesta exitosa
+    // Respuesta exitosa
     echo json_encode([
         'status' => 'success',
         'message' => 'Locker reservado correctamente',

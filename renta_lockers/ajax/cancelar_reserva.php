@@ -20,7 +20,7 @@ try {
     // Actualizar la reserva: cambiar fecha_c a hoy y estado a 0
     $query = "UPDATE plantilla.loc_reserva 
               SET estado = 0, fecha_c = ? 
-              WHERE clave_unica = ? AND estado = 1 
+              WHERE clave_unica = ? AND estado IN (1, 2) 
               LIMIT 1";
     
     $stmt = mysqli_prepare($dbh, $query);
@@ -48,6 +48,31 @@ try {
             }
         } catch (Exception $e) {
             // No interrumpir si Redis falla
+        }
+
+        // Actualizar el estado en el archivo JSON a 5 (cancelado)
+        try {
+            require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/utils.php');
+            if (!isset($error_redis) || !$error_redis) 
+            {
+                $fechaHoy = date('Y-m-d');
+                $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
+                
+                if (file_exists($nombreArchivoFila)) 
+                {
+                    $contenido = file_get_contents($nombreArchivoFila);
+                    $datosFila = json_decode($contenido, true) ?: [];
+                    
+                    $resultado = buscarRegistroAlumno($datosFila, $clvuni);
+                    if ($resultado['indice'] !== null) 
+                    {
+                        $datosFila[$resultado['indice']]['estado'] = 5; // Cancelado
+                        guardarEnArchivo($nombreArchivoFila, $datosFila);
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // No interrumpir si falla la actualización del JSON
         }
 
         echo json_encode([
