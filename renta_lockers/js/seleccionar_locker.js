@@ -203,7 +203,6 @@ function cancelarSeleccion() {
  * Guardar reserva en la base de datos y actualizar JSON de fila
  */
 function guardarReserva(locker) {
-    console.log('guardarReserva locker:', locker);
 
     // Primero: Guardar en la BD (plantilla.loc_reserva)
     $.post('ajax/reservar_locker.php', {
@@ -212,7 +211,6 @@ function guardarReserva(locker) {
         ciclo: ciclo
     })
     .done(function(data) {
-        console.log('reservar_locker response:', data);
         if (data.status === 'success') {
             actualizarLockerEnJSON(locker);
         } else {
@@ -229,9 +227,7 @@ function guardarReserva(locker) {
  * Formato del locker: "Edificio-Numero" (ej: "A-5", "B-12")
  */
 function actualizarLockerEnJSON(locker) {
-    console.log('actualizarLockerEnJSON locker:', locker);
-    console.log('payload:', { clvuni: clvuni, id_l: locker.id, ciclo: ciclo });
-
+    
     if (!locker || typeof locker.id === 'undefined' || locker.id === null) {
         console.error('Locker id missing antes de enviar solicitud:', locker);
         alert('Error interno: no se encontró el ID del locker. Por favor intenta de nuevo.');

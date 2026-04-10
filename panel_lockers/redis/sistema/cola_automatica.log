@@ -1,0 +1,8 @@
+
+Error en loop de cola_PHP Warning:  file_put_contents(/var/www/html/locAlumno 154583 movido automáticamente a selección de locker
+Alumno 158114 movido automáticamente a selección de locker
+/comun/utils.php on line 282
+Error en atenderSiguienteAutomatico: No se pudo escribir en el archivo: /var/www/html/locker_logs/fila_2025-2026-II_2026-04-09.json
+Error en loop de cola_automatica: El alumno no se encuentra en la fila
+Error en loop de cola_automatica: El alumno no se encuentra en la fila
+Error en loop de cola_automatica: El alumno no se encuentra en la fila

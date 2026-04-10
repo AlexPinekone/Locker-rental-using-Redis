@@ -216,6 +216,7 @@ function obtenerTextoEstado(estado)
         case 2: return 'Seleccionando';
         case 3: return 'Finalizado';
         case 4: return 'Expulsion';
+        case 5: return 'Cancelado';
         default: return 'Desconocido';
     }
 }

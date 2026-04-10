@@ -89,7 +89,7 @@ function renderizarTabla(reservas)
 function renderizarEstado(estado) 
 {
     const estados = {
-        0: '<span class="label label-default">Vacío</span>',
+        0: '<span class="label label-default">Libre</span>',
         1: '<span class="label label-primary">Reservado</span>',
         2: '<span class="label label-warning">Sin pago</span>',
         3: '<span class="label label-success">Pagado</span>'

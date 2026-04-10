@@ -444,4 +444,105 @@ function buscarRegistroAlumnoCicloCompleto($redis, $clvuni)
     return null;
 }
 
+/**
+ * Atender al siguiente alumno en la cola automáticamente
+ * 
+ * @param object $redis - Conexión a Redis
+ * @return bool - True si se atendió a alguien, false si no
+ */
+function atenderSiguienteAutomatico($redis) {
+    global $nombreCola;
+    
+    try {
+        $itemJson = $redis->lPop($nombreCola);
+
+        if ($itemJson) {
+            $datosAlumno = json_decode($itemJson, true);
+            $clvuni = $datosAlumno['clvuni'];
+            $turno = $datosAlumno['turno'];
+
+            $claveSeleccionando = 'locker:seleccionando';
+            $redis->hSet($claveSeleccionando, $clvuni, json_encode([
+                'turno' => $turno,
+                'inicio_turno' => time()
+            ]));
+
+            $fechaHoy = date('Y-m-d');
+
+            $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
+            $nombreArchivoTemporal = LOCKER_TEMP . "/temporal_{$fechaHoy}.jsonl";
+            $nombreArchivoSalidas = LOCKER_TEMP . "/salida_{$fechaHoy}.json";
+
+            // Llamar a la función de comparación y agregación
+            $datosFila = compararYAgregarRegistros($nombreArchivoTemporal, $nombreArchivoFila, $nombreArchivoSalidas);
+
+            // Buscar el registro del alumno
+            $resultado = buscarRegistroAlumno($datosFila, $clvuni);
+            $registroCompleto = $resultado['registro'];
+            $indiceRegistro = $resultado['indice'];
+
+            // Si no lo encuentra, crear uno nuevo
+            if (!$registroCompleto) {
+                $registroCompleto = crearNuevoRegistro($clvuni, $turno);
+                $indiceRegistro = count($datosFila);
+            }
+
+            // Marcar al alumno como en selección de locker
+            $registroCompleto['estado'] = 2;
+
+            // Actualizar en el array
+            $datosFila[$indiceRegistro] = $registroCompleto;
+
+            // Guardar el archivo actualizado
+            guardarEnArchivo($nombreArchivoFila, $datosFila);
+
+            error_log("Alumno $clvuni movido automáticamente a selección de locker");
+            return true;
+        } else {
+            return false;
+        }
+    } catch (Exception $e) {
+        error_log("Error en atenderSiguienteAutomatico: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Actualizar el estado de un registro de alumno en el archivo JSON
+ * 
+ * @param object $redis - Conexión a Redis
+ * @param string $clvuni - Clave única del alumno
+ * @param int $estado - Nuevo estado
+ * @param array $camposExtra - Campos adicionales a actualizar
+ * @return bool
+ * @throws Exception
+ */
+function actualizarEstadoRegistroAlumno($redis, $clvuni, $estado, $camposExtra = [])
+{
+    $fechaHoy = date('Y-m-d');
+    $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
+
+    if (!file_exists($nombreArchivoFila)) {
+        throw new Exception("No se encontró el archivo de fila: " . $nombreArchivoFila);
+    }
+
+    $contenido = file_get_contents($nombreArchivoFila);
+    $datosFila = json_decode($contenido, true) ?: [];
+
+    $resultado = buscarRegistroAlumno($datosFila, $clvuni);
+    if ($resultado['indice'] === null) {
+        throw new Exception("El alumno no se encuentra en la fila");
+    }
+
+    $indice = $resultado['indice'];
+    $datosFila[$indice]['estado'] = intval($estado);
+
+    foreach ($camposExtra as $campo => $valor) {
+        $datosFila[$indice][$campo] = $valor;
+    }
+
+    guardarEnArchivo($nombreArchivoFila, $datosFila);
+    return true;
+}
+
 ?>

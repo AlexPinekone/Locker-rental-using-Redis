@@ -30,38 +30,15 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 $lockersReservados = [];
 
-// Primero intenta con plantilla.loc_reserva
-$queryReservados = "SELECT id_l FROM plantilla.loc_reserva WHERE estado = 1";
+// Obtener lockers reservados con estado 1, 2 o 3
+$queryReservados = "SELECT id_l FROM plantilla.loc_reserva WHERE estado IN (1, 2, 3)";
 $resultReservados = mysqli_query($dbh, $queryReservados);
 
 if ($resultReservados && mysqli_num_rows($resultReservados) > 0) {
-    // Si encontró en plantilla.loc_reserva
-    $debug_tabla = "plantilla.loc_reserva";
     while ($row = mysqli_fetch_assoc($resultReservados)) {
         $lockersReservados[] = intval($row['id_l']);
     }
-} else {
-    // Si no, intenta en loc_reserva (sin schema)
-    $queryReservados = "SELECT id_l FROM loc_reserva WHERE estado = 1";
-    $resultReservados = mysqli_query($dbh, $queryReservados);
-    
-    if ($resultReservados && mysqli_num_rows($resultReservados) > 0) {
-        $debug_tabla = "loc_reserva";
-        while ($row = mysqli_fetch_assoc($resultReservados)) {
-            $lockersReservados[] = intval($row['id_l']);
-        }
-    } else {
-        $debug_tabla = "NINGUNA";
-    }
 }
-
-// Debug
-$debug_info = [
-    'tabla_usada' => $debug_tabla,
-    'cantidad_reservados' => count($lockersReservados),
-    'ids_reservados' => $lockersReservados,
-    'timestamp' => date('Y-m-d H:i:s')
-];
 
 mysqli_close($dbh);
 

@@ -8,4 +8,4 @@
     </div>
 </div>
 
-<script src="js/renta_locker.js?0007"></script>
+<script src="js/renta_locker.js?0008"></script>

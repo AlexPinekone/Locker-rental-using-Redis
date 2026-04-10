@@ -40,39 +40,17 @@ try {
     mysqli_close($dbh);
     
     if ($affectedRows > 0) {
-        // Limpiar estado en Redis si existe
+        // Limpiar estado en Redis y actualizar registros
         try {
             require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
+            require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
             if (!isset($error_redis) || !$error_redis) {
                 $redis->hDel('locker:seleccionando', $clvuni);
+                actualizarEstadoRegistroAlumno($redis, $clvuni, 5); // Estado cancelado
+                atenderSiguienteAutomatico($redis);
             }
         } catch (Exception $e) {
             // No interrumpir si Redis falla
-        }
-
-        // Actualizar el estado en el archivo JSON a 5 (cancelado)
-        try {
-            require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/utils.php');
-            if (!isset($error_redis) || !$error_redis) 
-            {
-                $fechaHoy = date('Y-m-d');
-                $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
-                
-                if (file_exists($nombreArchivoFila)) 
-                {
-                    $contenido = file_get_contents($nombreArchivoFila);
-                    $datosFila = json_decode($contenido, true) ?: [];
-                    
-                    $resultado = buscarRegistroAlumno($datosFila, $clvuni);
-                    if ($resultado['indice'] !== null) 
-                    {
-                        $datosFila[$resultado['indice']]['estado'] = 5; // Cancelado
-                        guardarEnArchivo($nombreArchivoFila, $datosFila);
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            // No interrumpir si falla la actualización del JSON
         }
 
         echo json_encode([

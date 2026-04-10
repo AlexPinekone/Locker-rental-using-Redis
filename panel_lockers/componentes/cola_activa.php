@@ -61,8 +61,8 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 </div>
 
 <script type="text/javascript">
-    let ultimaColaActiva = null;
-    let ultimoTotalCola = null;
+    var ultimaColaActiva = ultimaColaActiva || null;
+    var ultimoTotalCola = ultimoTotalCola || null;
 
     function cargarDetallesCola() {
         $.getJSON('redis/consultas/obtener_detalles_fila.php', function(data) {

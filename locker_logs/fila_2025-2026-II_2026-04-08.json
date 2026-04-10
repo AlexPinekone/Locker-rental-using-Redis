@@ -53,11 +53,12 @@
         "nombres": "ZYyeTmVvaz4xotp",
         "ape_pat": "PcMimxdoPKZI",
         "ape_mat": "EuWyqzfKJsik",
-        "estado": 0,
+        "estado": 1,
         "locker": "-",
         "posicion_entrada": 2,
         "fecha_hora_entrada": "2026-04-08 18:32:44",
-        "fecha_hora_asignacion": "-"
+        "fecha_hora_asignacion": "-",
+        "fecha_hora_salida": "2026-04-08 18:49:16"
     },
     {
         "clvuni": "100273",

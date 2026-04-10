@@ -1,15 +1,17 @@
 <?php
 
-require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
+// Para compatibilidad con CLI y web
+$rootPath = !empty($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : '/var/www/html';
+require($rootPath . '/comun/variables.php');
 date_default_timezone_set('America/Mexico_City');
 
 $redis = new Redis();
 $error_redis = false;
 
 // Las rutas que se usan a lo largo de todo el sistema
-define('PROYECTO_ROOT', realpath($_SERVER['DOCUMENT_ROOT'] . '/sistema_lockers'));
-define('LOCKER_LOGS',   realpath($_SERVER['DOCUMENT_ROOT'] . '/locker_logs'));
-define('LOCKER_TEMP',   realpath($_SERVER['DOCUMENT_ROOT'] . '/locker_logs/temp'));
+define('PROYECTO_ROOT', realpath($rootPath . '/sistema_lockers'));
+define('LOCKER_LOGS',   realpath($rootPath . '/locker_logs'));
+define('LOCKER_TEMP',   realpath($rootPath . '/locker_logs/temp'));
 
 try 
 {

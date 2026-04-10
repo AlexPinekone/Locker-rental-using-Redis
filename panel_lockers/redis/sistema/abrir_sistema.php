@@ -74,4 +74,7 @@ catch (Exception $e)
 {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
+
+// Al final del archivo, después de abrir el sistema
+exec('cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > cola_automatica.log 2>&1 &');
 ?>

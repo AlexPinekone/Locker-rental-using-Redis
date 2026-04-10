@@ -69,7 +69,7 @@ try {
     mysqli_stmt_close($stmtVerificar);
     
     // ✅ PASO 2: Verificar que el locker no esté ya reservado
-    $queryReservado = "SELECT id FROM plantilla.loc_reserva WHERE id_l = ? AND estado = 1 LIMIT 1";
+    $queryReservado = "SELECT id FROM plantilla.loc_reserva WHERE id_l = ? AND estado IN (1, 2, 3) LIMIT 1";
     $stmtReservado = mysqli_prepare($dbh, $queryReservado);
     
     if (!$stmtReservado) {
@@ -94,7 +94,7 @@ try {
     mysqli_stmt_close($stmtReservado);
     
     // ✅ PASO 3: Verificar que el usuario no tenga ya una reserva activa
-    $queryUserReserva = "SELECT id FROM plantilla.loc_reserva WHERE clave_unica = ? AND ciclo = ? AND estado = 1 LIMIT 1";
+    $queryUserReserva = "SELECT id FROM plantilla.loc_reserva WHERE clave_unica = ? AND ciclo = ? AND estado IN (1, 2) LIMIT 1";
     $stmtUserReserva = mysqli_prepare($dbh, $queryUserReserva);
     
     if (!$stmtUserReserva) {
@@ -143,9 +143,12 @@ try {
     // Limpiar estado de selección en Redis si existe
     try {
         require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
+        require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
         if (!isset($error_redis) || !$error_redis) {
             $claveSeleccionando = 'locker:seleccionando';
             $redis->hDel($claveSeleccionando, $clvuni);
+            actualizarEstadoRegistroAlumno($redis, $clvuni, 3); // Estado reservado
+            atenderSiguienteAutomatico($redis);
         }
     } catch (Exception $e) {
         // No interrumpir si Redis falla aquí, la reserva ya fue registrada.
