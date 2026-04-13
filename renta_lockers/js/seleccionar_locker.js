@@ -39,7 +39,8 @@ function inicializarSeleccionador(clvuniParam, cicloParam, lockersReservadosPara
  * @param {array} lockers - Array de lockers
  * @param {array} reservados - Array de IDs de lockers reservados
  */
-function generarMapa(edificio, lockers, reservados) {
+function generarMapa(edificio, lockers, reservados) 
+{
     const contenedor = document.getElementById('mapa-' + edificio);
     if (!contenedor) return;
     
@@ -99,7 +100,8 @@ function generarMapa(edificio, lockers, reservados) {
 /**
  * Seleccionar un locker
  */
-function seleccionarLocker(locker) {
+function seleccionarLocker(locker) 
+{
     // 1. Quitar clase del anterior usando el ID único
     if (lockersSeleccionado) {
         const btnAnterior = document.getElementById('locker-node-' + lockersSeleccionado.id);
@@ -121,7 +123,8 @@ function seleccionarLocker(locker) {
 /**
  * Confirmar selección y mostrar modal
  */
-function confirmarSeleccion() {
+function confirmarSeleccion() 
+{
     if (lockersSeleccionado) {
         document.getElementById('lockersSeleccionadoInfo').textContent = 
             `Locker #${lockersSeleccionado.numero} - Edificio ${lockersSeleccionado.edificio}`;
@@ -145,7 +148,8 @@ function confirmarFinal() {
     }
 }
 
-function obtenerTiempoDesdeServidor() {
+function obtenerTiempoDesdeServidor() 
+{
     $.getJSON('redis/cola/consultar_estado.php')
         .done(function(data) {
             if ((data.status === 'esperando' && data.posicion === 0 && data.tiempo_restante != null) || data.status === 'seleccionando') {
@@ -195,7 +199,20 @@ function actualizarTimerDisplay() {
  */
 function cancelarSeleccion() {
     if (confirm('¿Deseas cancelar la selección y volver al panel?')) {
-        window.location.href = 'dashboard.php';
+        // Cancelar la selección: cambiar estado a 5 y remover de Redis
+        $.post('ajax/cancelar_seleccion_locker.php')
+            .done(function(data) {
+                if (data.status === 'success') {
+                    window.location.href = 'dashboard.php';
+                } else {
+                    alert('Error: ' + data.message);
+                    window.location.href = 'dashboard.php';
+                }
+            })
+            .fail(function() {
+                console.error('Error al cancelar selección');
+                window.location.href = 'dashboard.php';
+            });
     }
 }
 
@@ -294,9 +311,11 @@ function iniciarTimer() {
 function tiempoAgotado() {
     alert('Se ha agotado el tiempo para seleccionar un locker.');
 
+    // El estado será actualizado automáticamente por cola_automatica.php
+    // Solo limpiar sesión en Redis
     $.post('ajax/expulsar_seleccion.php')
         .fail(function() {
-            console.warn('No se pudo actualizar el estado de expiración en el JSON');
+            console.warn('No se pudo limpiar la sesión en Redis o el estado en el JSON');
         })
         .always(function() {
             window.location.href = 'dashboard.php';

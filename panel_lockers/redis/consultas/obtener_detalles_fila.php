@@ -19,12 +19,14 @@ try
     $nombreArchivoTemporal      = LOCKER_TEMP . "/temporal_{$fechaHoy}.jsonl";
     $nombreArchivoSalidas = LOCKER_TEMP . "/salidas_{$fechaHoy}.json";
 
-    // Obtener la cola actual de Redis
+    // Obtener la cola actual de Redis y los alumnos que están seleccionando locker
     $proximos = $redis->lRange($nombreCola, 0, -1);
+    $claveSeleccionando = 'locker:seleccionando';
+    $seleccionandoHash = $redis->hGetAll($claveSeleccionando);
 
-    if (empty($proximos)) 
+    if (empty($proximos) && empty($seleccionandoHash)) 
     {
-        // Cola vacía: limpiar y resetear
+        // Cola vacía y sin seleccionando: limpiar y resetear
         $redis->del('contador:turno');
 
         // Procesar salidas en fila
@@ -59,7 +61,7 @@ try
     // Llamar a la función de comparación y agregación
     compararYAgregarRegistros($nombreArchivoTemporal, $nombreArchivoFila, $nombreArchivoSalidas);
 
-    // Crear array de turnos de Redis para búsqueda rápida
+    // Crear arrays de turnos de Redis para búsqueda rápida
     $turnosEnCola = [];
     foreach ($proximos as $item) 
     {
@@ -69,6 +71,18 @@ try
             $turnosEnCola[$datosAlumno['turno']] = $datosAlumno['clvuni'];
         }
     }
+
+    $turnosSeleccionando = [];
+    foreach ($seleccionandoHash as $clvuni => $jsonData) 
+    {
+        $datosSeleccionando = json_decode($jsonData, true);
+        if (isset($datosSeleccionando['turno'])) 
+        {
+            $turnosSeleccionando[$datosSeleccionando['turno']] = $clvuni;
+        }
+    }
+
+    $turnosActivos = array_merge($turnosEnCola, $turnosSeleccionando);
     
     // Leer archivo fila
     $detalles = [];
@@ -79,23 +93,43 @@ try
             $contenido = file_get_contents($nombreArchivoFila);
             $registrosFila = json_decode($contenido, true) ?: [];
             
-            // Filtrar solo los registros que están en la cola actual
+            // Filtrar registros: estado 0 si están en cola Redis, estado 2 si están en hash seleccionando
             foreach ($registrosFila as $registro) 
             {
-                if (isset($registro['turno']) && isset($turnosEnCola[$registro['turno']])) 
+                $mostrarRegistro = false;
+
+                if (isset($registro['estado'])) 
                 {
-                    // Verificar que el clvuni coincida
-                    if ($registro['clvuni'] === $turnosEnCola[$registro['turno']]) 
+                    $estado = intval($registro['estado']);
+
+                    if ($estado == 0) 
                     {
-                        $detalles[] = [
-                            'turno' => $registro['turno'] ?? '-',
-                            'clvuni' => $registro['clvuni'] ?? '-',
-                            'fecha_hora_entrada' => $registro['fecha_hora_entrada'] ?? '-',
-                            'locker' => $registro['locker'] ?? '-',
-                            'estado' => $registro['estado'] ?? '0',
-                            'posicion' => count($detalles) + 1
-                        ];
+                        // Para estado 0: verificar que esté en la cola Redis
+                        if (isset($registro['turno']) && isset($turnosEnCola[$registro['turno']]) && $registro['clvuni'] === $turnosEnCola[$registro['turno']]) 
+                        {
+                            $mostrarRegistro = true;
+                        }
+                    } 
+                    elseif ($estado == 2) 
+                    {
+                        // Para estado 2: verificar que esté en el hash seleccionando
+                        if (isset($seleccionandoHash[$registro['clvuni']])) 
+                        {
+                            $mostrarRegistro = true;
+                        }
                     }
+                }
+
+                if ($mostrarRegistro) 
+                {
+                    $detalles[] = [
+                        'turno' => $registro['turno'] ?? '-',
+                        'clvuni' => $registro['clvuni'] ?? '-',
+                        'fecha_hora_entrada' => $registro['fecha_hora_entrada'] ?? '-',
+                        'locker' => $registro['locker'] ?? '-',
+                        'estado' => $registro['estado'] ?? '0',
+                        'posicion' => count($detalles) + 1
+                    ];
                 }
             }
         } 
@@ -108,6 +142,7 @@ try
     echo json_encode([
         'status' => 'success',
         'total_cola' => $redis->lLen($nombreCola),
+        'total_activos' => count($detalles),
         'detalles' => $detalles
     ]);
 }

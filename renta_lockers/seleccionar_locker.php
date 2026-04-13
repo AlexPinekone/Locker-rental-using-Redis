@@ -9,8 +9,21 @@ if (!isset($_SESSION['clvuni'])) {
 }
 
 require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
+require('redis/comun/conexion_redis.php');
 
 $clvuni = $_SESSION['clvuni'];
+
+// Verificar que el usuario esté autorizado a seleccionar (debe estar en locker:seleccionando en Redis)
+if (!isset($error_redis) || !$error_redis) {
+    $claveSeleccionando = 'locker:seleccionando';
+    $estaSeleccionando = $redis->hExists($claveSeleccionando, $clvuni);
+    
+    if (!$estaSeleccionando) {
+        // El usuario no está en la etapa de selección, redirigir a dashboard
+        header('Location: dashboard.php');
+        exit;
+    }
+}
 $nombres = isset($_SESSION['nombres']) ? $_SESSION['nombres'] : '';
 $ape_pat = isset($_SESSION['ape_pat']) ? $_SESSION['ape_pat'] : '';
 $ape_mat = isset($_SESSION['ape_mat']) ? $_SESSION['ape_mat'] : '';
@@ -42,9 +55,7 @@ if ($resultReservados && mysqli_num_rows($resultReservados) > 0) {
 
 mysqli_close($dbh);
 
-// Obtener ciclo desde Redis (guardado en abrir_sistema.php)
-require('redis/comun/conexion_redis.php');
-
+// Obtener ciclo desde Redis
 $cicloActual = (isset($redis) && (!isset($error_redis) || !$error_redis)) 
     ? $redis->get('config:ciclo') 
     : date('Y');

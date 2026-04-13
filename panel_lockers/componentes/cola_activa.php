@@ -71,16 +71,17 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
             }
 
             const detalles = data.detalles || [];
-            const total = data.total_cola || 0;
+            const totalCola = data.total_cola || 0; // cola de Redis
+            const totalActivos = data.total_activos || detalles.length;
             const detallesJSON = JSON.stringify(detalles);
 
-            if (detallesJSON === ultimaColaActiva && total === ultimoTotalCola) {
+            if (detallesJSON === ultimaColaActiva && totalActivos === ultimoTotalCola) {
                 return;
             }
 
             ultimaColaActiva = detallesJSON;
-            ultimoTotalCola = total;
-            $('#total-cola').text(total);
+            ultimoTotalCola = totalActivos;
+            $('#total-cola').text(totalActivos);
 
             if (detalles.length === 0) {
                 $('#tabla-proximos-body').html('<tr><td colspan="5" style="text-align: center;">Cola vacía</td></tr>');
@@ -96,7 +97,7 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
                     html += '</tr>';
                 });
                 $('#tabla-proximos-body').html(html);
-                $('#btn-atender').prop('disabled', false);
+                $('#btn-atender').prop('disabled', totalCola === 0);
             }
         }).fail(function() {
             $('#tabla-proximos-body').html('<tr><td colspan="5" style="text-align: center;">Error de conexión</td></tr>');

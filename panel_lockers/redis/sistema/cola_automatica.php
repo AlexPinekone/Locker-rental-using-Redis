@@ -30,10 +30,17 @@ while (true) {
                 $tiempoTranscurrido = time() - intval($datos['inicio_turno']);
                 if ($tiempoTranscurrido >= $tiempoLimite) {
                     // Tiempo expirado: marcar como perdido y remover
-                    $redis->hDel($claveSeleccionando, $clvuni);
-                    actualizarEstadoRegistroAlumno($redis, $clvuni, 4); // Estado perdido
-                    error_log("Tiempo expirado para $clvuni, marcado como perdido");
-                    $alguienExpirado = true;
+                    try 
+                    {
+                        $redis->hDel($claveSeleccionando, $clvuni);
+                        actualizarEstadoRegistroAlumno($redis, $clvuni, 4); // Estado perdido
+                        error_log("✓ Tiempo expirado para $clvuni, marcado como perdido (estado 4)");
+                        $alguienExpirado = true;
+                    } catch (Exception $expEx) {
+                        error_log("✗ Error al procesar expiración de $clvuni: " . $expEx->getMessage());
+                        // Intentar remover de todas formas
+                        $redis->hDel($claveSeleccionando, $clvuni);
+                    }
                 }
             }
         }

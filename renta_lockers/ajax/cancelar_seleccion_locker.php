@@ -13,6 +13,7 @@ $clvuni = $_SESSION['clvuni'];
 
 try {
     require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
+    require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
 
     if (isset($error_redis) && $error_redis) {
         throw new Exception($error_redis);
@@ -21,13 +22,18 @@ try {
     $clvuni_seguro = htmlspecialchars($clvuni);
     $claveSeleccionando = 'locker:seleccionando';
 
-    // Limpiar estado de selección en Redis
-    // El cambio de estado a 4 en JSON es responsabilidad exclusiva de cola_automatica.php
+    // Remover de la etapa de selección en Redis
     $redis->hDel($claveSeleccionando, $clvuni_seguro);
+
+    // Actualizar el estado a 1 (salió) en el JSON
+    actualizarEstadoRegistroAlumno($redis, $clvuni_seguro, 1);
+
+    // Atender al siguiente alumno automáticamente
+    atenderSiguienteAutomatico($redis);
 
     echo json_encode([
         'status' => 'success',
-        'message' => 'Sesión de selección finalizada',
+        'message' => 'Selección cancelada. Pasando al siguiente alumno.',
         'clvuni' => $clvuni_seguro
     ]);
 } catch (Exception $e) {
@@ -36,3 +42,4 @@ try {
         'message' => 'Error: ' . $e->getMessage()
     ]);
 }
+?>

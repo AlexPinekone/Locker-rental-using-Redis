@@ -145,7 +145,7 @@ function procesarSalidasEnFila ($nombreArchivoFila, $nombreArchivoSalidas)
             $ultimoIndice = null;
             for ($i = count($datosFila) - 1; $i >= 0; $i--) 
             {
-                if (isset($datosFila[$i]['clvuni']) && $datosFila[$i]['clvuni'] === $clvuni) 
+                if (isset($datosFila[$i]['clvuni']) && strval($datosFila[$i]['clvuni']) === strval($clvuni)) 
                 {
                     $ultimoIndice = $i;
                     break;
@@ -208,7 +208,7 @@ function buscarRegistroAlumno($datosFila, $clvuni)
     $ultimoRegistro = null;
     for ($i = count($datosFila) - 1; $i >= 0; $i--) 
     {
-        if (isset($datosFila[$i]['clvuni']) && $datosFila[$i]['clvuni'] === $clvuni) 
+        if (isset($datosFila[$i]['clvuni']) && strval($datosFila[$i]['clvuni']) === strval($clvuni)) 
         {
             $ultimoIndice = $i;
             $ultimoRegistro = $datosFila[$i];
@@ -352,7 +352,7 @@ function sacarDeColaPorClvuni($redis, $nombreCola, $clvuni)
     foreach ($lista as $idx => $item) 
     {
         $itemDecodificado = json_decode($item, true);
-        if ($itemDecodificado['clvuni'] === $clvuni) 
+        if (strval($itemDecodificado['clvuni']) === strval($clvuni)) 
         {
             $indiceEncontrado = $idx;
             $datosUsuarioEnCola = $itemDecodificado;
@@ -472,7 +472,7 @@ function buscarRegistroAlumnoCicloCompleto($redis, $clvuni)
         // Buscar la última instancia del alumno en este archivo
         for ($i = count($registros) - 1; $i >= 0; $i--)
         {
-            if (isset($registros[$i]['clvuni']) && $registros[$i]['clvuni'] === $clvuni)
+            if (isset($registros[$i]['clvuni']) && strval($registros[$i]['clvuni']) === strval($clvuni))
             {
                 return $registros[$i];
             }
