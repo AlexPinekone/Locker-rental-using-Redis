@@ -25,8 +25,8 @@ try {
     // Remover de la etapa de selección en Redis
     $redis->hDel($claveSeleccionando, $clvuni_seguro);
 
-    // Actualizar el estado a 1 (salió) en el JSON
-    actualizarEstadoRegistroAlumno($redis, $clvuni_seguro, 1);
+    // Actualizar el estado a 5 (salió) en el JSON
+    actualizarEstadoRegistroAlumno($redis, $clvuni_seguro, 5);
 
     // Atender al siguiente alumno automáticamente
     atenderSiguienteAutomatico($redis);

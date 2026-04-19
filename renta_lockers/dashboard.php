@@ -86,7 +86,7 @@ else if ($clvuni)
             if (isset($itemDecodificado['clvuni']) && $itemDecodificado['clvuni'] === $clvuni) 
             {
                 $usuarioEnCola = true;
-                $turnoActual = $itemDecodificado['turno'];
+                $turnoActual = $itemDecodificado['turno']; 
                 $posicionEnCola = $idx;
 
                 // Verificar si está siendo atendido

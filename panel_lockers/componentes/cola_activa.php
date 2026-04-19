@@ -110,6 +110,8 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
             case 1: return 'Salida Propia';
             case 2: return 'Seleccionando';
             case 3: return 'Finalizado';
+            case 4: return 'Expulsado';
+            case 5: return 'Cancelaci&oacute;n';
             default: return 'Desconocido';
         }
     }
