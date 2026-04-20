@@ -127,14 +127,30 @@ if ($clvuni)
             
             while ($intento < $maxReintentos && !$turnoAnteriorEnCola) 
             {
+
+                $turnoAnteriorEnCola = false;
+
+                // Buscar en la cola (lista)
                 $lista = $redis->lRange($nombreCola, 0, -1);
-                foreach ($lista as $item) 
-                {
+                foreach ($lista as $item) {
                     $itemDecodificado = json_decode($item, true);
-                    if ($itemDecodificado['turno'] === $turnoAnterior) 
-                    {
+                    if (isset($itemDecodificado['turno']) && $itemDecodificado['turno'] === $turnoAnterior) {
                         $turnoAnteriorEnCola = true;
                         break;
+                    }
+                }
+
+                // Si no está en cola, buscar en "seleccionando"
+                if (!$turnoAnteriorEnCola) {
+                    $seleccionando = $redis->hGetAll('locker:seleccionando');
+
+                    foreach ($seleccionando as $clv => $jsonData) {
+                        $datos = json_decode($jsonData, true);
+
+                        if (isset($datos['turno']) && $datos['turno'] === $turnoAnterior) {
+                            $turnoAnteriorEnCola = true;
+                            break;
+                        }
                     }
                 }
                 

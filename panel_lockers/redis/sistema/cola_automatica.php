@@ -16,6 +16,22 @@ while (true) {
             sleep(5);
             continue;
         }
+        error_log("Instancia");
+        //Cerrar el sistema automáticamente si no hay lockers disponibles
+        /*
+        if (hayLockersDisponibles()) {
+            error_log(" No hay lockers disponibles. Cerrando sistema automáticamente...");
+
+            // Cambiar estado en Redis
+            $redis->set('config:estado_sistema', 'cerrado');
+
+            // (Opcional) limpiar estructuras
+            $redis->del($nombreCola);
+            $redis->del('locker:seleccionando');
+
+            sleep(10);
+            continue;
+        }*/
 
         $claveSeleccionando = 'locker:seleccionando';
         $tiempoLimite = 120;
@@ -34,10 +50,10 @@ while (true) {
                     {
                         $redis->hDel($claveSeleccionando, $clvuni);
                         actualizarEstadoRegistroAlumno($redis, $clvuni, 4); // Estado perdido
-                        error_log("✓ Tiempo expirado para $clvuni, marcado como perdido (estado 4)");
+                        error_log(" Tiempo expirado para $clvuni, marcado como perdido (estado 4)");
                         $alguienExpirado = true;
                     } catch (Exception $expEx) {
-                        error_log("✗ Error al procesar expiración de $clvuni: " . $expEx->getMessage());
+                        error_log(" Error al procesar expiración de $clvuni: " . $expEx->getMessage());
                         // Intentar remover de todas formas
                         $redis->hDel($claveSeleccionando, $clvuni);
                     }
@@ -57,5 +73,28 @@ while (true) {
     }
 
     sleep(3); // Revisar cada segundo
+}
+
+
+function hayLockersDisponibles() {
+    require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
+
+    // Total de lockers activos
+    $queryTotal = "SELECT COUNT(*) as total FROM plantilla.loc_locker WHERE activo = 1";
+    $resTotal = mysqli_query($dbh, $queryTotal);
+    $total = mysqli_fetch_assoc($resTotal)['total'];
+
+    // Lockers ya reservados
+    $queryReservados = "SELECT COUNT(*) as reservados 
+                        FROM plantilla.loc_reserva 
+                        WHERE estado IN (1,2,3)";
+    $resReservados = mysqli_query($dbh, $queryReservados);
+    $reservados = mysqli_fetch_assoc($resReservados)['reservados'];
+
+    error_log("OKKKK");
+
+    mysqli_close($dbh);
+
+    return ($reservados >= $total);
 }
 ?>
