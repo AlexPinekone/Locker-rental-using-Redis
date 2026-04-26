@@ -43,8 +43,8 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 $lockersReservados = [];
 
-// Obtener lockers reservados con estado 1, 2 o 3
-$queryReservados = "SELECT id_l FROM plantilla.loc_reserva WHERE estado IN (1, 2, 3)";
+// Obtener lockers reservados con estado 1 o 3
+$queryReservados = "SELECT id_l FROM plantilla.loc_reserva WHERE estado IN (1, 3)";
 $resultReservados = mysqli_query($dbh, $queryReservados);
 
 if ($resultReservados && mysqli_num_rows($resultReservados) > 0) {

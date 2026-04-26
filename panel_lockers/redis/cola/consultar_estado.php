@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 session_start();
 
 require('../comun/conexion_redis.php');
-require('../comun/utils.php');
+require_once('../comun/utils.php');
 
 $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
 

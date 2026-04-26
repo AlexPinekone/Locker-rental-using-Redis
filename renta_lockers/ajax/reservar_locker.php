@@ -31,7 +31,7 @@ if ($_SESSION['clvuni'] != $clvuni) {
 try {
     require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
 
-    // ✅ PASO 1: Verificar que el locker exista y esté activo
+    // Verificar que el locker exista y esté activo
     $queryVerificar = "SELECT id, numero, activo FROM plantilla.loc_locker WHERE id = ? LIMIT 1";
     $stmtVerificar = mysqli_prepare($dbh, $queryVerificar);
     
@@ -68,8 +68,8 @@ try {
     
     mysqli_stmt_close($stmtVerificar);
     
-    // ✅ PASO 2: Verificar que el locker no esté ya reservado
-    $queryReservado = "SELECT id FROM plantilla.loc_reserva WHERE id_l = ? AND estado IN (1, 2, 3) LIMIT 1";
+    // Verificar que el locker no esté ya reservado
+    $queryReservado = "SELECT id FROM plantilla.loc_reserva WHERE id_l = ? AND estado IN (1, 3) LIMIT 1";
     $stmtReservado = mysqli_prepare($dbh, $queryReservado);
     
     if (!$stmtReservado) {
@@ -93,8 +93,8 @@ try {
     
     mysqli_stmt_close($stmtReservado);
     
-    // ✅ PASO 3: Verificar que el usuario no tenga ya una reserva activa
-    $queryUserReserva = "SELECT id FROM plantilla.loc_reserva WHERE clave_unica = ? AND ciclo = ? AND estado IN (1, 2) LIMIT 1";
+    // Verificar que el usuario no tenga ya una reserva activa
+    $queryUserReserva = "SELECT id FROM plantilla.loc_reserva WHERE clave_unica = ? AND ciclo = ? AND estado IN (1, 3) LIMIT 1";
     $stmtUserReserva = mysqli_prepare($dbh, $queryUserReserva);
     
     if (!$stmtUserReserva) {
@@ -118,7 +118,7 @@ try {
     
     mysqli_stmt_close($stmtUserReserva);
     
-    // ✅ PASO 4: INSERTAR la reserva
+    // INSERTAR la reserva
     $fechaRenta = date('Y-m-d H:i:s');
     $estado = 1;
 
@@ -143,7 +143,7 @@ try {
     // Limpiar estado de selección en Redis si existe
     try {
         require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
-        require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
+        require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
         if (!isset($error_redis) || !$error_redis) {
             $claveSeleccionando = 'locker:seleccionando';
             $redis->hDel($claveSeleccionando, $clvuni);

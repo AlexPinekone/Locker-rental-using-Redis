@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 
 require('../comun/conexion_redis.php');
 require('../comun/verificar_sistema.php');
-require('../comun/utils.php');
+require_once('../comun/utils.php');
 
 if (isset($error_redis) && $error_redis) 
 {

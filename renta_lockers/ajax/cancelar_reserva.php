@@ -43,11 +43,9 @@ try {
         // Limpiar estado en Redis y actualizar registros
         try {
             require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
-            require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
+            require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
             if (!isset($error_redis) || !$error_redis) {
-                $redis->hDel('locker:seleccionando', $clvuni);
                 actualizarEstadoRegistroAlumno($redis, $clvuni, 5); // Estado cancelado
-                atenderSiguienteAutomatico($redis);
             }
         } catch (Exception $e) {
             // No interrumpir si Redis falla

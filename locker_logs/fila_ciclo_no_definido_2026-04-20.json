@@ -1,0 +1,86 @@
+[
+    {
+        "clvuni": "144422",
+        "turno": 1,
+        "nombres": "eGM8N3xDUfTg1ku",
+        "ape_pat": "JBDnVSYRubvP",
+        "ape_mat": "UaAkbmDeYOvo",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-04-20 17:11:58",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "144429",
+        "turno": 2,
+        "nombres": "UNxcOTfoXk2g1vG",
+        "ape_pat": "ZYknLjiruBVl",
+        "ape_mat": "TaLiNmxcMSEw",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-04-20 17:12:01",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "144710",
+        "turno": 3,
+        "nombres": "uzvyparSjwdDc8t",
+        "ape_pat": "EsiycgXZUHbj",
+        "ape_mat": "KxAcRqmoZysF",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 1,
+        "fecha_hora_entrada": "2026-04-20 17:12:15",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "145707",
+        "turno": 4,
+        "nombres": "VLECnZe4gIYAr6B",
+        "ape_pat": "GHQzJhciTgOs",
+        "ape_mat": "ZnNUackpuOIW",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 2,
+        "fecha_hora_entrada": "2026-04-20 17:12:24",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "145726",
+        "turno": 5,
+        "nombres": "W7DrzOkfB1bY6Lg",
+        "ape_pat": "WznPmWXduQFf",
+        "ape_mat": "HlrObCVYUzoa",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 3,
+        "fecha_hora_entrada": "2026-04-20 17:12:31",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "147613",
+        "turno": 6,
+        "nombres": "ow8WraUtET9m2R5",
+        "ape_pat": "InYEXgDAVpbW",
+        "ape_mat": "BsRiPZgtjVoT",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 4,
+        "fecha_hora_entrada": "2026-04-20 17:12:38",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "144422",
+        "turno": 7,
+        "nombres": "eGM8N3xDUfTg1ku",
+        "ape_pat": "JBDnVSYRubvP",
+        "ape_mat": "UaAkbmDeYOvo",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 4,
+        "fecha_hora_entrada": "2026-04-20 17:14:34",
+        "fecha_hora_asignacion": "-"
+    }
+]

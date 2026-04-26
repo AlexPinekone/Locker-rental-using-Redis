@@ -24,6 +24,69 @@ require('redis/comun/conexion_redis.php');
 $estadoSistema = $redis->get('config:estado_sistema');
 $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
 
+// NUEVA LÓGICA: Verificación de auto-apertura/cierre
+// Incluir archivo de utilidades de procesos para verificar horarios
+require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/procesos.php');
+require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
+require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
+
+// Verificar si es hora de apertura y abrir automáticamente si es necesario
+if ($estadoSistema !== 'abierto') {
+    $horarios = obtenerHorariosConfig($dbh);
+    
+    if ($horarios && estamosEnPeriodoDeApertura($horarios)) {
+        // Es hora de apertura, abrir automáticamente
+        if (!isset($_SESSION['ciclo'])) {
+            $_SESSION['ciclo'] = 'sin-ciclo-definido';
+        }
+        
+        $ciclo = $_SESSION['ciclo'];
+        $redis->set('config:ciclo', $ciclo);
+        
+        $fechaHoy = date('Y-m-d');
+        
+        // Crear carpetas si no existen
+        if (!is_dir(LOCKER_TEMP)) {
+            mkdir(LOCKER_TEMP, 0755, true);
+        }
+        
+        // Definición de rutas de los archivos
+        $archivos = [
+            getNombreArchivoFila($redis, $fechaHoy),
+            LOCKER_TEMP . "/temporal_{$fechaHoy}.jsonl",
+            LOCKER_TEMP . "/salidas_{$fechaHoy}.json",
+        ];
+        
+        // Buscar si ya están los archivos, si no crea un json[] o un jsonl vacío
+        foreach ($archivos as $ruta) {
+            if (!file_exists($ruta)) {
+                $esJson = str_ends_with($ruta, '.json');
+                file_put_contents($ruta, $esJson ? '[]' : '');
+            }
+        }
+        
+        // Marcar sistema como abierto
+        $redis->set('config:estado_sistema', 'abierto');
+        $redis->set('config:fecha_apertura', date('Y-m-d H:i:s'));
+        
+        // Limpiar cola
+        $redis->del($nombreCola);
+        $redis->del('contador:turno');
+        
+        // Iniciar cola automática (solo si no está corriendo)
+        iniciarColaAutomaticaSiNoEsta();
+        
+        // Actualizar la variable para reflejar que se abrió
+        $estadoSistema = 'abierto';
+    }
+}
+
+// Cerrar conexión después de verificación de horarios
+if (isset($dbh)) {
+    mysqli_close($dbh);
+}
+
+// Si el sistema no está abierto, mostrar mensaje de cerrado
 if ($estadoSistema !== 'abierto') 
 {
     $sistemaCerrado = true;
@@ -53,7 +116,7 @@ else if ($clvuni)
     $queryLocker = "SELECT lr.id, lr.id_l, ll.numero, ll.id_a, lr.fecha_r, lr.fecha_c 
                     FROM plantilla.loc_reserva lr
                     JOIN plantilla.loc_locker ll ON lr.id_l = ll.id
-                    WHERE lr.clave_unica = ? AND lr.estado IN (1, 2) 
+                    WHERE lr.clave_unica = ? AND lr.estado IN (1, 3) 
                     LIMIT 1";
     
     $stmtLocker = mysqli_prepare($dbh, $queryLocker);
@@ -73,7 +136,7 @@ else if ($clvuni)
     // Si no tiene locker, buscar si está en la cola
     if ($estadoAlumno === 'inicio' && isset($redis) && (!isset($error_redis) || !$error_redis)) 
     {
-        require('redis/comun/utils.php');
+        require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
 
         // Usar el nombre de cola global definido en conexion_redis.php
         global $nombreCola;

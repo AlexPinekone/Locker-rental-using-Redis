@@ -33,15 +33,15 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
             </colgroup>
             <thead style="position: sticky; top: 0; background: #f9f9f9; z-index: 10;">
                 <tr>
-                    <th style="border-bottom: 2px solid #ddd; width: 8%;">Turno</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 6%;">Turno</th>
                     <th style="border-bottom: 2px solid #ddd; width: 12%;">Hora Entrada</th>
                     <th style="border-bottom: 2px solid #ddd; width: 10%;">Clave Única</th>
                     <th style="border-bottom: 2px solid #ddd; width: 18%;">Nombres</th>
                     <th style="border-bottom: 2px solid #ddd; width: 12%;">Ape_pat</th>
                     <th style="border-bottom: 2px solid #ddd; width: 12%;">Ape_Mat</th>
-                    <th style="border-bottom: 2px solid #ddd; width: 8%;">Locker</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 5%;">Locker</th>
                     <th style="border-bottom: 2px solid #ddd; width: 15%;">Hora Asignación</th>
-                    <th style="border-bottom: 2px solid #ddd; width: 5%;">Estado</th>
+                    <th style="border-bottom: 2px solid #ddd; width: 10%;">Estado</th>
                 </tr>
             </thead>
             <tbody id="tabla-todos-registros-body">

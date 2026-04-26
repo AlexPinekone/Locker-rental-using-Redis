@@ -102,7 +102,7 @@ function generarMapa(edificio, lockers, reservados)
  */
 function seleccionarLocker(locker) 
 {
-    // 1. Quitar clase del anterior usando el ID único
+    // Quitar clase del anterior usando el ID único
     if (lockersSeleccionado) {
         const btnAnterior = document.getElementById('locker-node-' + lockersSeleccionado.id);
         if (btnAnterior) {
@@ -110,7 +110,7 @@ function seleccionarLocker(locker)
         }
     }
 
-    // 2. Marcar el nuevo
+    // Marcar el nuevo
     lockersSeleccionado = locker;
     const btnNuevo = document.getElementById('locker-node-' + locker.id);
     if (btnNuevo) {

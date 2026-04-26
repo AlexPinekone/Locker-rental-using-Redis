@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 session_start();
 
 require('../comun/conexion_redis.php');
-require('../comun/utils.php');
+require_once('../comun/utils.php');
 
 //Guardar el ciclo en conexion_redis para que lo use todo el sitemas
 
@@ -76,7 +76,9 @@ catch (Exception $e)
 }
 
 // Al final del archivo, después de abrir el sistema
-//exec('cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > cola_automatica.log 2>&1 &');
+// NOTA: La cola automática es iniciada por dashboard.php cuando es hora de apertura
+// No debe ser iniciada aquí para evitar múltiples instancias
+// exec('cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > /tmp/cola_automatica.log 2>&1 &');
 // Usando una ruta absoluta y un directorio con permisos de escritura para www-data
-exec('cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > /tmp/cola_automatica.log 2>&1 &');
+// exec('cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > /tmp/cola_automatica.log 2>&1 &');
 ?>

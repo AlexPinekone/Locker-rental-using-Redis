@@ -290,44 +290,6 @@ function guardarEnArchivo($nombreArchivo, $datos)
 }
 
 /**
- * Actualizar el estado de un registro de alumno en el archivo fila.
- *
- * @param object $redis - Conexión a Redis
- * @param string $clvuni - Clave única del alumno
- * @param int $estado - Nuevo estado a aplicar
- * @param array $camposExtra - Campos adicionales a actualizar
- * @return bool - True si se actualizó correctamente
- * @throws Exception
- */
-function actualizarEstadoRegistroAlumno($redis, $clvuni, $estado, $camposExtra = [])
-{
-    $fechaHoy = date('Y-m-d');
-    $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
-
-    if (!file_exists($nombreArchivoFila)) {
-        throw new Exception("No se encontró el archivo de fila: " . $nombreArchivoFila);
-    }
-
-    $contenido = file_get_contents($nombreArchivoFila);
-    $datosFila = json_decode($contenido, true) ?: [];
-
-    $resultado = buscarRegistroAlumno($datosFila, $clvuni);
-    if ($resultado['indice'] === null) {
-        throw new Exception("El alumno no se encuentra en la fila");
-    }
-
-    $indice = $resultado['indice'];
-    $datosFila[$indice]['estado'] = intval($estado);
-
-    foreach ($camposExtra as $campo => $valor) {
-        $datosFila[$indice][$campo] = $valor;
-    }
-
-    guardarEnArchivo($nombreArchivoFila, $datosFila);
-    return true;
-}
-
-/**
  * Sacar a un usuario de la cola en Redis
  * 
  * @param object $redis - Conexión a Redis
@@ -553,7 +515,7 @@ function atenderSiguienteAutomatico($redis) {
 }
 
 /**
- * Atender al siguiente alumno en la cola manualmente
+ * Atender al siguiente alumno en la cola automáticamente
  * 
  * @param object $redis - Conexión a Redis
  * @return bool - True si se atendió a alguien, false si no
@@ -606,7 +568,7 @@ function atenderSiguienteManual($redis) {
             // Guardar el archivo actualizado
             guardarEnArchivo($nombreArchivoFila, $datosFila);
 
-            error_log("Alumno $clvuni movido manualmente a selección de locker");
+            error_log("Alumno $clvuni movido automáticamente a selección de locker");
             return true;
         } 
         else 
@@ -614,9 +576,47 @@ function atenderSiguienteManual($redis) {
             return false;
         }
     } catch (Exception $e) {
-        error_log("Error en atenderSiguienteManual: " . $e->getMessage());
+        error_log("Error en atenderSiguienteAutomatico: " . $e->getMessage());
         return false;
     }
+}
+
+/**
+ * Actualizar el estado de un registro de alumno en el archivo JSON
+ * 
+ * @param object $redis - Conexión a Redis
+ * @param string $clvuni - Clave única del alumno
+ * @param int $estado - Nuevo estado
+ * @param array $camposExtra - Campos adicionales a actualizar
+ * @return bool
+ * @throws Exception
+ */
+function actualizarEstadoRegistroAlumno($redis, $clvuni, $estado, $camposExtra = [])
+{
+    $fechaHoy = date('Y-m-d');
+    $nombreArchivoFila = getNombreArchivoFila($redis, $fechaHoy);
+
+    if (!file_exists($nombreArchivoFila)) {
+        throw new Exception("No se encontró el archivo de fila: " . $nombreArchivoFila);
+    }
+
+    $contenido = file_get_contents($nombreArchivoFila);
+    $datosFila = json_decode($contenido, true) ?: [];
+
+    $resultado = buscarRegistroAlumno($datosFila, $clvuni);
+    if ($resultado['indice'] === null) {
+        throw new Exception("El alumno no se encuentra en la fila");
+    }
+
+    $indice = $resultado['indice'];
+    $datosFila[$indice]['estado'] = intval($estado);
+
+    foreach ($camposExtra as $campo => $valor) {
+        $datosFila[$indice][$campo] = $valor;
+    }
+
+    guardarEnArchivo($nombreArchivoFila, $datosFila);
+    return true;
 }
 
 ?>

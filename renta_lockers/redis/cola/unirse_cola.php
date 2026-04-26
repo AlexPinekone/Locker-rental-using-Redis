@@ -4,7 +4,7 @@ session_start();
 
 require('../comun/conexion_redis.php');
 require('../comun/verificar_sistema.php');
-require('../comun/utils.php');
+require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
 
 $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
 $nombres = isset($_SESSION['nombres']) ? $_SESSION['nombres'] : null;
@@ -44,8 +44,8 @@ if ($clvuni)
         mysqli_stmt_close($stmt);
         mysqli_close($dbh);
         
-        // Si existe registro en BD y estado es 1 o 2 (reserva activa o pagada), no permitir unirse
-        if ($registroBD && in_array($registroBD['estado'], [1, 2])) {
+        // Si existe registro en BD y estado es 1 o 3 (reserva activa o pagada), no permitir unirse
+        if ($registroBD && in_array($registroBD['estado'], [1, 3])) {
             echo json_encode([
                 'status'  => 'error',
                 'message' => 'Ya tienes una reserva activa en este ciclo. No puedes unirte nuevamente.',

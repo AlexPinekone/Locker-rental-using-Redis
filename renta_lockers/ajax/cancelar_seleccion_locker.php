@@ -13,7 +13,7 @@ $clvuni = $_SESSION['clvuni'];
 
 try {
     require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
-    require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
+    require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
 
     if (isset($error_redis) && $error_redis) {
         throw new Exception($error_redis);
