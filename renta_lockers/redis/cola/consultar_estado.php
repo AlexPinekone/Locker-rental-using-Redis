@@ -42,6 +42,20 @@ if ($clvuni)
             ]);
             exit;
         }
+
+        // Verificar cola congelada
+        $colaCongelada = $redis->get('cola:congelada') === '1';
+        $fechaCongelacion = $redis->get('cola:fecha_congelacion');
+        
+        // Si la cola está congelada, devolver el estado de congelación
+        if ($colaCongelada) {
+            echo json_encode([
+                'status'  => 'cola_congelada',
+                'message' => 'La cola está congelada por falta de lockers disponibles',
+                'fecha_congelacion' => $fechaCongelacion
+            ]);
+            exit;
+        }
         
         //Buscar al alumno en la fila de redis
         $clvuni_seguro = htmlspecialchars($clvuni);

@@ -493,6 +493,18 @@ function atenderSiguienteAutomatico($redis) {
     $claveSeleccionando = 'locker:seleccionando';
     
     try {
+
+        //verificar si la cola está congelada antes de intentar atender
+        require('/var/www/html/comun/conectar.php');
+        
+        if (!hayLockersDisponiblesDirecto($dbh)) {
+            error_log(" Intento de atender siguiente bloqueado: No hay lockers disponibles");
+            mysqli_close($dbh);
+            return false;
+        }
+        
+        mysqli_close($dbh);
+
         $ocupados = $redis->hLen($claveSeleccionando);
 
         //Verificar que la seleccion este vacia para atender al siguiente
@@ -563,6 +575,18 @@ function atenderSiguienteManual($redis) {
     $claveSeleccionando = 'locker:seleccionando';
     
     try {
+
+        //Verificar si la cola está congelada
+        require('/var/www/html/comun/conectar.php');
+        
+        if (!hayLockersDisponiblesDirecto($dbh)) {
+            error_log(" Intento de atender siguiente bloqueado: No hay lockers disponibles");
+            mysqli_close($dbh);
+            return false;
+        }
+        
+        mysqli_close($dbh);
+
         $ocupados = $redis->hLen($claveSeleccionando);
 
         $itemJson = $redis->lPop($nombreCola);
@@ -615,6 +639,46 @@ function atenderSiguienteManual($redis) {
         }
     } catch (Exception $e) {
         error_log("Error en atenderSiguienteManual: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Verificar si hay lockers disponibles consultando la BD en tiempo real
+ * 
+ * @param mysqli $dbh - Conexión a base de datos
+ * @return bool - True si hay disponibles, False si no
+ */
+function hayLockersDisponiblesDirecto($dbh) {
+    try {
+        // Total de lockers activos
+        $queryTotal = "SELECT COUNT(*) as total FROM plantilla.loc_locker WHERE activo = 1";
+        $resTotal = mysqli_query($dbh, $queryTotal);
+        if (!$resTotal) {
+            error_log("Error en query de lockers totales: " . mysqli_error($dbh));
+            return false;
+        }
+        $rowTotal = mysqli_fetch_assoc($resTotal);
+        $total = $rowTotal['total'];
+ 
+        // Lockers ya reservados/asignados
+        $queryReservados = "SELECT COUNT(*) as reservados 
+                            FROM plantilla.loc_reserva 
+                            WHERE estado IN (1,3)";
+        $resReservados = mysqli_query($dbh, $queryReservados);
+        if (!$resReservados) {
+            error_log("Error en query de lockers reservados: " . mysqli_error($dbh));
+            return false;
+        }
+        $rowReservados = mysqli_fetch_assoc($resReservados);
+        $reservados = $rowReservados['reservados'];
+ 
+        $disponibles = $total - $reservados;
+        error_log("Verificación de lockers: Disponibles=$disponibles, Total=$total, Reservados=$reservados");
+        
+        return ($reservados < $total);
+    } catch (Exception $e) {
+        error_log("Error en hayLockersDisponiblesDirecto: " . $e->getMessage());
         return false;
     }
 }

@@ -40,6 +40,8 @@ file_put_contents($rutaPID, getmypid());
 $horarios = obtenerHorariosConfig($dbh);
 $ultimaActualizacionHorarios = time();
 $intervaloRefresh = 60; 
+$ultimaVerificacionLockers = time();
+$intervaloVerificacionLockers = 10;
 
 if (!$horarios) {
     error_log("Error: No hay configuración de horarios establecida");
@@ -53,17 +55,28 @@ while (true) {
     }
     
     try {
-        if (time() - $ultimaActualizacionHorarios >= $intervaloRefresh) {
+        //Refescar horarios
+        if (time() - $ultimaActualizacionHorarios >= $intervaloRefresh) 
+        {
             $horarios = obtenerHorariosConfig($dbh);
             $ultimaActualizacionHorarios = time();
             error_log("Horarios refrescados: " . json_encode($horarios));
         }
+
+        //Verificar disponibilidad de lockers
+        if (time() - $ultimaVerificacionLockers >= $intervaloVerificacionLockers) {
+            $infoLockers = verificarYManejarDisponibilidadLockers($redis, $dbh);
+            error_log("Estado Lockers - Disponibles: {$infoLockers['disponibles']}/{$infoLockers['total']} | Cola congelada: " . 
+                      ($redis->get('cola:congelada') === '1' ? 'SÍ' : 'NO'));
+            $ultimaVerificacionLockers = time();
+        }
+
         $debioCerrar = yaDebioCerrar($horarios);
         error_log("Verificación de cierre - Resultado: " . ($debioCerrar ? 'SÍ' : 'NO') . 
                   " | Horarios: " . json_encode($horarios) . 
                   " | Hora actual: " . date('Y-m-d H:i:s'));
 
-        // VERIFICACIÓN 1: Verificar si ya es hora de CIERRE automático
+        // Verificar cierre
         if ($debioCerrar) {
             error_log("Hora de cierre alcanzada. Cerrando sistema automáticamente...");
             
@@ -86,6 +99,13 @@ while (true) {
         
         // Verificar si el sistema está abierto
         if ($redis->get('config:estado_sistema') !== 'abierto') {
+            sleep(5);
+            continue;
+        }
+
+        // Si la cola está congelada, no hacer nada más que esperar
+        if ($redis->get('cola:congelada') === '1') {
+            error_log("Cola está congelada, esperando disponibilidad de lockers...");
             sleep(5);
             continue;
         }
@@ -178,5 +198,63 @@ function hayLockersDisponibles() {
     mysqli_close($dbh);
 
     return ($reservados >= $total);
+}
+
+/**
+ * Verifica disponibilidad de lockers y congela/descongela la cola
+ * @param Redis $redis - Conexión a Redis
+ * @param mysqli $dbh - Conexión a BD
+ * @return array - ['hay_disponibles' => bool, 'total' => int, 'reservados' => int]
+ */
+function verificarYManejarDisponibilidadLockers($redis, $dbh)
+{
+    try {
+        // Total de lockers activos
+        $queryTotal = "SELECT COUNT(*) as total FROM plantilla.loc_locker WHERE activo = 1";
+        $resTotal = mysqli_query($dbh, $queryTotal);
+        $total = mysqli_fetch_assoc($resTotal)['total'];
+
+        // Lockers ya reservados/asignados
+        $queryReservados = "SELECT COUNT(*) as reservados 
+                            FROM plantilla.loc_reserva 
+                            WHERE estado IN (1,3)";
+        $resReservados = mysqli_query($dbh, $queryReservados);
+        $reservados = mysqli_fetch_assoc($resReservados)['reservados'];
+
+        $hayDisponibles = ($reservados < $total);
+
+        // GESTIONAR ESTADO EN REDIS
+        if (!$hayDisponibles) {
+            // NO hay lockers disponibles → CONGELAR cola
+            if ($redis->get('cola:congelada') !== '1') {
+                $redis->set('cola:congelada', '1');
+                $redis->set('cola:fecha_congelacion', date('Y-m-d H:i:s'));
+                error_log(" COLA CONGELADA - No hay lockers disponibles (Reservados: $reservados/$total)");
+            }
+        } else {
+            // SÍ hay lockers disponibles → DESCONGELAR cola
+            if ($redis->get('cola:congelada') === '1') {
+                $redis->del('cola:congelada');
+                $redis->del('cola:fecha_congelacion');
+                error_log(" COLA DESCONGELADA - Lockers disponibles de nuevo (Disponibles: " . ($total - $reservados) . "/$total)");
+            }
+        }
+
+        return [
+            'hay_disponibles' => $hayDisponibles,
+            'total' => $total,
+            'reservados' => $reservados,
+            'disponibles' => $total - $reservados
+        ];
+
+    } catch (Exception $e) {
+        error_log("Error en verificarYManejarDisponibilidadLockers: " . $e->getMessage());
+        return [
+            'hay_disponibles' => false,
+            'total' => 0,
+            'reservados' => 0,
+            'disponibles' => 0
+        ];
+    }
 }
 ?>

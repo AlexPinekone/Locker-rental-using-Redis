@@ -448,37 +448,50 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
         }
 
         function revisarTurno() {
-            $.getJSON('redis/cola/consultar_estado.php')
-                .done(function(data) {
-                    if (data.status === 'sistema_cerrado') {
-                        clearInterval(intervalo);
-                        $('#cola-estado').html(`
-                            <div class="alert alert-warning">
-                                <h4>Sistema cerrado</h4>
-                                <p>${data.message}</p>
-                                <p style="font-size:0.85em; color:#666;">Has sido removido de la cola automáticamente.</p>
-                            </div>
-                            <a href="dashboard.php" class="btn btn-secondary">Volver</a>
-                        `);
+        $.getJSON('redis/cola/consultar_estado.php')
+            .done(function(data) {
+                // Verificar congelacion de la cola
+                if (data.status === 'cola_congelada') {
+                    if (!colaCongeladaMostrada) {
+                        mostrarAlertaCongelacion(data);
+                        colaCongeladaMostrada = true;
                     }
-                    else if (data.status === 'atendido') 
-                    {
-                        // Si ya no está en cola, mostrar estado inicial (o redirigir si es tu turno)
-                        ocultarCola();
-                    }
-                    else if (data.status === 'seleccionando') 
-                    {
-                        window.location.href = 'seleccionar_locker.php';
-                    }
-                    else if (data.status === 'esperando') 
-                    {
-                        mostrarCola(data.turno, data.personas_delante);
-                    }
-                })
-                .fail(function() {
-                    console.error('Error al conectar con el servidor');
-                });
-        }
+                    return; // No continuar procesando
+                }
+                
+                // Si se descongela, mostrar notificación
+                if (colaCongeladaMostrada && data.status !== 'cola_congelada') {
+                    ocultarAlertaCongelacion();
+                    mostrarNotificacionDescongelada();
+                    colaCongeladaMostrada = false;
+                }
+                
+                // Resto de lógica original
+                if (data.status === 'sistema_cerrado') {
+                    clearInterval(intervalo);
+                    $('#cola-estado').html(`
+                        <div class="alert alert-warning">
+                            <h4>Sistema cerrado</h4>
+                            <p>${data.message}</p>
+                            <p style="font-size:0.85em; color:#666;">Has sido removido de la cola automáticamente.</p>
+                        </div>
+                        <a href="dashboard.php" class="btn btn-secondary">Volver</a>
+                    `);
+                }
+                else if (data.status === 'atendido') {
+                    ocultarCola();
+                }
+                else if (data.status === 'seleccionando') {
+                    window.location.href = 'seleccionar_locker.php';
+                }
+                else if (data.status === 'esperando') {
+                    mostrarCola(data.turno, data.personas_delante);
+                }
+            })
+            .fail(function() {
+                console.error('Error al conectar con el servidor');
+            });
+    }
 
         function verificarEstadoInicial() 
         {
@@ -514,6 +527,68 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
         $(document).ready(function() {
             verificarEstadoInicial();
         });
+
+        let colaCongeladaMostrada = false;
+
+        // Mostrar alerta cuando está congelada
+        function mostrarAlertaCongelacion(data) {
+            const mensaje = `
+                <div id="alerta-congelacion" class="alert alert-warning" style="margin: 20px 0; border: 2px solid #ff9800;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 32px;">❄️</div>
+                        <div>
+                            <h4 style="margin: 0; color: #ff6b00;">
+                                <strong>Cola Congelada</strong>
+                            </h4>
+                            <p style="margin: 5px 0; font-size: 14px;">
+                                No hay lockers disponibles en este momento.
+                            </p>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; color: #ff6b00; font-weight: bold;">
+                                ⏳ Esperando disponibilidad de lockers...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if ($('#alerta-congelacion').length === 0) {
+                $('#cola-estado').prepend(mensaje);
+            }
+        }
+
+        // Ocultar alerta de congelación
+        function ocultarAlertaCongelacion() {
+            $('#alerta-congelacion').fadeOut(300, function() {
+                $(this).remove();
+            });
+        }
+
+        // Notificación cuando se descongela
+        function mostrarNotificacionDescongelada() {
+            const notificacion = $(`
+                <div class="alert alert-success" style="margin: 20px 0; border: 2px solid #28a745;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 32px;">✅</div>
+                        <div>
+                            <h4 style="margin: 0; color: #28a745;">
+                                <strong>¡Cola Activa!</strong>
+                            </h4>
+                            <p style="margin: 5px 0;">
+                                Los lockers vuelven a estar disponibles.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `);
+            
+            $('#cola-estado').prepend(notificacion);
+            
+            setTimeout(function() {
+                notificacion.fadeOut(500, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
     </script>
 </body>
 

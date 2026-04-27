@@ -22,9 +22,9 @@ try
     // Obtener la cola actual de Redis y los alumnos que están seleccionando locker
     $proximos = $redis->lRange($nombreCola, 0, -1);
     $claveSeleccionando = 'locker:seleccionando';
-    $seleccionandoHash = $redis->hGetAll($claveSeleccionando);
+    $seleccionando = $redis->hGetAll($claveSeleccionando);
 
-    if (empty($proximos) && empty($seleccionandoHash)) 
+    if (empty($proximos) && empty($seleccionando)) 
     {
         // Cola vacía y sin seleccionando: limpiar y resetear
         $redis->del('contador:turno');
@@ -73,7 +73,7 @@ try
     }
 
     $turnosSeleccionando = [];
-    foreach ($seleccionandoHash as $clvuni => $jsonData) 
+    foreach ($seleccionando as $clvuni => $jsonData) 
     {
         $datosSeleccionando = json_decode($jsonData, true);
         if (isset($datosSeleccionando['turno'])) 
@@ -113,7 +113,7 @@ try
                     elseif ($estado == 2) 
                     {
                         // Para estado 2: verificar que esté en el hash seleccionando
-                        if (isset($seleccionandoHash[$registro['clvuni']])) 
+                        if (isset($seleccionando[$registro['clvuni']])) 
                         {
                             $mostrarRegistro = true;
                         }
