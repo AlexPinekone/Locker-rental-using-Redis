@@ -6,7 +6,8 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 date_default_timezone_set('America/Mexico_City');
 
 // Verificar sesión
-if (!isset($_SESSION['clvuni'])) {
+if (!isset($_SESSION['clvuni'])) 
+{
     echo json_encode(['status' => 'error', 'message' => 'Sesión no válida']);
     exit;
 }
@@ -14,7 +15,8 @@ if (!isset($_SESSION['clvuni'])) {
 $clvuni = $_SESSION['clvuni'];
 $fechaHoy = date('Y-m-d H:i:s');
 
-try {
+try 
+{
     require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
 
     // Actualizar la reserva: cambiar fecha_c a hoy y estado a 0
@@ -25,13 +27,15 @@ try {
     
     $stmt = mysqli_prepare($dbh, $query);
     
-    if (!$stmt) {
+    if (!$stmt) 
+    {
         throw new Exception("Error en prepared statement: " . mysqli_error($dbh));
     }
     
     mysqli_stmt_bind_param($stmt, "ss", $fechaHoy, $clvuni);
     
-    if (!mysqli_stmt_execute($stmt)) {
+    if (!mysqli_stmt_execute($stmt)) 
+    {
         throw new Exception("Error al ejecutar update: " . mysqli_stmt_error($stmt));
     }
     
@@ -39,15 +43,20 @@ try {
     mysqli_stmt_close($stmt);
     mysqli_close($dbh);
     
-    if ($affectedRows > 0) {
+    if ($affectedRows > 0) 
+    {
         // Limpiar estado en Redis y actualizar registros
-        try {
+        try 
+        {
             require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
             require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
-            if (!isset($error_redis) || !$error_redis) {
+            if (!isset($error_redis) || !$error_redis) 
+            {
                 actualizarEstadoRegistroAlumno($redis, $clvuni, 5); // Estado cancelado
             }
-        } catch (Exception $e) {
+        } 
+        catch (Exception $e) 
+        {
             // No interrumpir si Redis falla
         }
 
@@ -56,15 +65,20 @@ try {
             'message' => 'Reserva cancelada correctamente',
             'fecha_cancelacion' => $fechaHoy
         ]);
-    } else {
+    } 
+    else 
+    {
         echo json_encode([
             'status' => 'error',
             'message' => 'No se encontró una reserva activa para cancelar'
         ]);
     }
 
-} catch (Exception $e) {
-    if (isset($dbh)) {
+} 
+catch (Exception $e) 
+{
+    if (isset($dbh)) 
+    {
         mysqli_close($dbh);
     }
     

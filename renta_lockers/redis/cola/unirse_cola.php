@@ -45,7 +45,8 @@ if ($clvuni)
         mysqli_close($dbh);
         
         // Si existe registro en BD y estado es 1 o 3 (reserva activa o pagada), no permitir unirse
-        if ($registroBD && in_array($registroBD['estado'], [1, 3])) {
+        if ($registroBD && in_array($registroBD['estado'], [1, 3])) 
+        {
             echo json_encode([
                 'status'  => 'error',
                 'message' => 'Ya tienes una reserva activa en este ciclo. No puedes unirte nuevamente.',
@@ -71,10 +72,14 @@ if ($clvuni)
         if ($registroExistenteJSON && in_array($registroExistenteJSON['estado'], [1, 3, 4, 5])) {
             // Crear registro completamente nuevo
             $estadoExistente = 0;
-        } elseif ($registroExistenteJSON) {
+        } 
+        elseif ($registroExistenteJSON) 
+            {
             // Usar el estado del registro existente
             $estadoExistente = $registroExistenteJSON['estado'];
-        } else {
+        } 
+        else 
+        {
             $estadoExistente = 0;
         }
         
@@ -132,22 +137,27 @@ if ($clvuni)
 
                 // Buscar en la cola (lista)
                 $lista = $redis->lRange($nombreCola, 0, -1);
-                foreach ($lista as $item) {
+                foreach ($lista as $item) 
+                {
                     $itemDecodificado = json_decode($item, true);
-                    if (isset($itemDecodificado['turno']) && $itemDecodificado['turno'] === $turnoAnterior) {
+                    if (isset($itemDecodificado['turno']) && $itemDecodificado['turno'] === $turnoAnterior) 
+                    {
                         $turnoAnteriorEnCola = true;
                         break;
                     }
                 }
 
                 // Si no está en cola, buscar en "seleccionando"
-                if (!$turnoAnteriorEnCola) {
+                if (!$turnoAnteriorEnCola) 
+                {
                     $seleccionando = $redis->hGetAll('locker:seleccionando');
 
-                    foreach ($seleccionando as $clv => $jsonData) {
+                    foreach ($seleccionando as $clv => $jsonData) 
+                    {
                         $datos = json_decode($jsonData, true);
 
-                        if (isset($datos['turno']) && $datos['turno'] === $turnoAnterior) {
+                        if (isset($datos['turno']) && $datos['turno'] === $turnoAnterior) 
+                        {
                             $turnoAnteriorEnCola = true;
                             break;
                         }
@@ -257,7 +267,7 @@ else
 }
 
 /**
- * Función auxiliar para registrar turnos perdidos
+ * Función para registrar turnos perdidos
  */
 function registrarTurnoPerdido($numeroTurno, $fechaHoy)
 {

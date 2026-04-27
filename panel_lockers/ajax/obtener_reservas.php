@@ -32,7 +32,8 @@ try
 
     $resultado = mysqli_query($dbh, $query);
 
-    if (!$resultado) {
+    if (!$resultado) 
+    {
         throw new Exception("Error en la consulta: " . mysqli_error($dbh));
     }
 

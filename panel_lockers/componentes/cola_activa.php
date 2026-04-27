@@ -64,9 +64,11 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
     var ultimaColaActiva = ultimaColaActiva || null;
     var ultimoTotalCola = ultimoTotalCola || null;
 
-    function cargarDetallesCola() {
+    function cargarDetallesCola() 
+    {
         $.getJSON('redis/consultas/obtener_detalles_fila.php', function(data) {
-            if (data.status !== 'success') {
+            if (data.status !== 'success') 
+            {
                 return;
             }
 
@@ -75,7 +77,8 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
             const totalActivos = data.total_activos || detalles.length;
             const detallesJSON = JSON.stringify(detalles);
 
-            if (detallesJSON === ultimaColaActiva && totalActivos === ultimoTotalCola) {
+            if (detallesJSON === ultimaColaActiva && totalActivos === ultimoTotalCola) 
+            {
                 return;
             }
 
@@ -83,10 +86,13 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
             ultimoTotalCola = totalActivos;
             $('#total-cola').text(totalActivos);
 
-            if (detalles.length === 0) {
+            if (detalles.length === 0) 
+            {
                 $('#tabla-proximos-body').html('<tr><td colspan="5" style="text-align: center;">Cola vacía</td></tr>');
                 $('#btn-atender').prop('disabled', true);
-            } else {
+            } 
+            else 
+            {
                 let html = '';
                 detalles.forEach(function(alumno) {
                     html += '<tr>';
@@ -104,8 +110,10 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
         });
     }
 
-    function obtenerTextoEstado(estado) {
-        switch(estado) {
+    function obtenerTextoEstado(estado) 
+    {
+        switch(estado) 
+        {
             case 0: return 'Normal';
             case 1: return 'Salida Propia';
             case 2: return 'Seleccionando';

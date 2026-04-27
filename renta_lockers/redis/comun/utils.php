@@ -1,5 +1,5 @@
 <?php
-
+//ESTO SE PUEDE BORRAR. LO DEJO POR SI ACASO.
 //Rutas de los archivos si por algun motivo no son definidas en conexion_redis.php
 if (!defined('PROYECTO_ROOT')) 
 {

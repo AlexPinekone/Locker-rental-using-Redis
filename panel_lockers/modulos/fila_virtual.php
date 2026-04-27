@@ -20,7 +20,8 @@
         cargarComponenteColaActiva();
         cargarComponenteRegistros();
         setInterval(function() {
-            if (typeof cargarDetallesCola === 'function') {
+            if (typeof cargarDetallesCola === 'function') 
+            {
                 cargarDetallesCola();
             }
         }, 2000);

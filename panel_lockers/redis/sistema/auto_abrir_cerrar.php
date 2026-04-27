@@ -1,6 +1,6 @@
 <?php
 /**
- * auto_abrir_cerrar.php - Script para apertura/cierre automático del sistema
+ * Script para apertura/cierre automático del sistema
  * Verifica horarios y realiza apertura/cierre automático
  */
 
@@ -11,18 +11,21 @@ require('../comun/conexion_redis.php');
 require('../comun/procesos.php');
 require_once('../comun/utils.php');
 
-if (isset($error_redis) && $error_redis) {
+if (isset($error_redis) && $error_redis) 
+{
     echo json_encode(['status' => 'error', 'message' => $error_redis]);
     exit;
 }
 
-try {
+try 
+{
     require($_SERVER['DOCUMENT_ROOT'] . '/comun/conectar.php');
     
     // Obtener horarios de la configuración
     $horarios = obtenerHorariosConfig($dbh);
     
-    if (!$horarios) {
+    if (!$horarios) 
+    {
         echo json_encode([
             'status' => 'error',
             'message' => 'No hay configuración de horarios establecida'
@@ -33,11 +36,13 @@ try {
     
     $estadoSistema = $redis->get('config:estado_sistema');
     
-    // CASO 1: Verificar si debe estar ABIERTO
-    if (estamosEnPeriodoDeApertura($horarios)) {
+    // Verificar si debe estar abierto
+    if (estamosEnPeriodoDeApertura($horarios)) 
+    {
         
         // Si ya está abierto, solo verificar que cola_automatica esté corriendo
-        if ($estadoSistema === 'abierto') {
+        if ($estadoSistema === 'abierto') 
+        {
             $resultadoInit = iniciarColaAutomaticaSiNoEsta();
             
             echo json_encode([
@@ -49,9 +54,10 @@ try {
             exit;
         }
         
-        // Si no está abierto, ABRIRLO AUTOMÁTICAMENTE
-        // Código similar a abrir_sistema.php
-        if (!isset($_SESSION['ciclo'])) {
+        // Si no está abierto, abrelo
+        // Código similar como abrir_sistema.php
+        if (!isset($_SESSION['ciclo'])) 
+        {
             $_SESSION['ciclo'] = 'sin-ciclo-definido';
         }
         
@@ -61,7 +67,8 @@ try {
         $fechaHoy = date('Y-m-d');
         
         // Crear carpetas si no existen
-        if (!is_dir(LOCKER_TEMP)) {
+        if (!is_dir(LOCKER_TEMP)) 
+        {
             mkdir(LOCKER_TEMP, 0755, true);
         }
         
@@ -73,8 +80,10 @@ try {
         ];
         
         // Buscar si ya están los archivos, si no crea un json[] o un jsonl vacío
-        foreach ($archivos as $ruta) {
-            if (!file_exists($ruta)) {
+        foreach ($archivos as $ruta) 
+        {
+            if (!file_exists($ruta)) 
+            {
                 $esJson = str_ends_with($ruta, '.json');
                 file_put_contents($ruta, $esJson ? '[]' : '');
             }
@@ -103,11 +112,13 @@ try {
         exit;
     }
     
-    // CASO 2: Verificar si debe estar CERRADO
-    if (yaDebioCerrar($horarios)) {
+    // Verificar si debe estar CERRADO
+    if (yaDebioCerrar($horarios)) 
+    {
         
-        if ($estadoSistema === 'abierto') {
-            // CERRAR EL SISTEMA AUTOMÁTICAMENTE
+        if ($estadoSistema === 'abierto') 
+        {
+            // Cerrar el sistema automáticamente
             
             // Marcar como cerrado
             $redis->set('config:estado_sistema', 'cerrado');
@@ -121,14 +132,18 @@ try {
             $resultadoDetener = detenerColaAutomatica();
             
             // Limpiar archivos temporales
-            if (is_dir(LOCKER_TEMP)) {
+            if (is_dir(LOCKER_TEMP)) 
+            {
                 $archivos = scandir(LOCKER_TEMP);
-                foreach ($archivos as $archivo) {
-                    if ($archivo === '.' || $archivo === '..') {
+                foreach ($archivos as $archivo) 
+                {
+                    if ($archivo === '.' || $archivo === '..') 
+                    {
                         continue;
                     }
                     $rutaArchivo = LOCKER_TEMP . '/' . $archivo;
-                    if (is_file($rutaArchivo)) {
+                    if (is_file($rutaArchivo)) 
+                    {
                         @unlink($rutaArchivo);
                     }
                 }
@@ -151,7 +166,7 @@ try {
         exit;
     }
     
-    // CASO 3: Fuera del horario
+    // Fuera del horario
     echo json_encode([
         'status' => 'fuera_horario',
         'message' => 'El sistema aún no está disponible o ya cerró',

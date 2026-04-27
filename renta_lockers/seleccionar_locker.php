@@ -3,7 +3,8 @@ session_start();
 require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 date_default_timezone_set('America/Mexico_City');
 
-if (!isset($_SESSION['clvuni'])) {
+if (!isset($_SESSION['clvuni'])) 
+{
     header('Location: login.php');
     exit;
 }
@@ -14,11 +15,13 @@ require('redis/comun/conexion_redis.php');
 $clvuni = $_SESSION['clvuni'];
 
 // Verificar que el usuario esté autorizado a seleccionar (debe estar en locker:seleccionando en Redis)
-if (!isset($error_redis) || !$error_redis) {
+if (!isset($error_redis) || !$error_redis) 
+{
     $claveSeleccionando = 'locker:seleccionando';
     $estaSeleccionando = $redis->hExists($claveSeleccionando, $clvuni);
     
-    if (!$estaSeleccionando) {
+    if (!$estaSeleccionando) 
+    {
         // El usuario no está en la etapa de selección, redirigir a dashboard
         header('Location: dashboard.php');
         exit;
@@ -33,9 +36,11 @@ $query = "SELECT id, id_a, numero, ren, col, activo FROM plantilla.loc_locker OR
 $result = mysqli_query($dbh, $query);
 
 $lockesPorEdificio = [];
-while ($row = mysqli_fetch_assoc($result)) {
+while ($row = mysqli_fetch_assoc($result)) 
+{
     $edificio = $row['id_a'];
-    if (!isset($lockesPorEdificio[$edificio])) {
+    if (!isset($lockesPorEdificio[$edificio])) 
+    {
         $lockesPorEdificio[$edificio] = [];
     }
     $lockesPorEdificio[$edificio][] = $row;
@@ -47,8 +52,10 @@ $lockersReservados = [];
 $queryReservados = "SELECT id_l FROM plantilla.loc_reserva WHERE estado IN (1, 3)";
 $resultReservados = mysqli_query($dbh, $queryReservados);
 
-if ($resultReservados && mysqli_num_rows($resultReservados) > 0) {
-    while ($row = mysqli_fetch_assoc($resultReservados)) {
+if ($resultReservados && mysqli_num_rows($resultReservados) > 0) 
+{
+    while ($row = mysqli_fetch_assoc($resultReservados)) 
+    {
         $lockersReservados[] = intval($row['id_l']);
     }
 }
@@ -185,16 +192,17 @@ $cicloActual = (isset($redis) && (!isset($error_redis) || !$error_redis))
     </div>
 
     <script>
-    const edificiosData = <?php echo json_encode($lockesPorEdificio); ?>;
-    document.addEventListener('DOMContentLoaded', function() {
-        inicializarSeleccionador(
-            "<?php echo htmlspecialchars($clvuni); ?>",
-            "<?php echo htmlspecialchars($cicloActual); ?>",
-            <?php echo json_encode($lockersReservados); ?>,
-            edificiosData
-        );
-    });
-</script>
+        //Mandar los datos necesarios para renderizar los mapas de lockers y manejar la selección:
+        const edificiosData = <?php echo json_encode($lockesPorEdificio); ?>;
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarSeleccionador(
+                "<?php echo htmlspecialchars($clvuni); ?>",
+                "<?php echo htmlspecialchars($cicloActual); ?>",
+                <?php echo json_encode($lockersReservados); ?>,
+                edificiosData
+            );
+        });
+    </script>
 
 </body>
 

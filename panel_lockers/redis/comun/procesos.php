@@ -22,14 +22,16 @@ function estaColaAutomaticaEnEjecucion()
 {
     $rutaPID = obtenerRutaPIDColaaAutomatica();
     
-    if (!file_exists($rutaPID)) {
+    if (!file_exists($rutaPID)) 
+    {
         return false;
     }
     
     $pid = file_get_contents($rutaPID);
     $pid = trim($pid);
     
-    if (empty($pid) || !is_numeric($pid)) {
+    if (empty($pid) || !is_numeric($pid)) 
+    {
         return false;
     }
     
@@ -46,25 +48,32 @@ function estaColaAutomaticaEnEjecucion()
 function iniciarColaAutomaticaSiNoEsta()
 {
     // Si hay un proceso ejecutándose, verificar si está funcionando
-    if (estaColaAutomaticaEnEjecucion()) {
+    if (estaColaAutomaticaEnEjecucion()) 
+    {
         // Verificar si el proceso está realmente saludable (log sin errores recientes)
         $logPath = '/tmp/cola_automatica.log';
-        if (file_exists($logPath)) {
+        if (file_exists($logPath)) 
+        {
             $logContent = file_get_contents($logPath);
             // Si hay errores de "Failed to open stream" en las últimas líneas, el proceso está fallando
             if (strpos($logContent, 'Failed to open stream') !== false && 
-                strpos($logContent, 'conectar.php') !== false) {
+                strpos($logContent, 'conectar.php') !== false) 
+            {
                 error_log("Proceso de cola_automatica fallando, deteniendo y reiniciando...");
                 detenerColaAutomatica();
                 sleep(2); // Esperar a que se detenga
-            } else {
+            } 
+            else 
+            {
                 return [
                     'status' => 'ya_ejecutandose',
                     'message' => 'cola_automatica.php ya está en ejecución',
                     'pid' => file_get_contents(obtenerRutaPIDColaaAutomatica())
                 ];
             }
-        } else {
+        } 
+        else 
+        {
             return [
                 'status' => 'ya_ejecutandose',
                 'message' => 'cola_automatica.php ya está en ejecución',
@@ -73,13 +82,15 @@ function iniciarColaAutomaticaSiNoEsta()
         }
     }
     
-    try {
+    try 
+    {
         // Ejecutar en background y obtener el PID
         $comando = 'cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > /tmp/cola_automatica.log 2>&1 & echo $!';
         $pid = exec($comando);
         $pid = trim($pid);
         
-        if (empty($pid) || !is_numeric($pid)) {
+        if (empty($pid) || !is_numeric($pid)) 
+        {
             throw new Exception('No se pudo obtener el PID del nuevo proceso');
         }
         
@@ -92,7 +103,9 @@ function iniciarColaAutomaticaSiNoEsta()
             'message' => 'cola_automatica.php iniciado correctamente',
             'pid' => $pid
         ];
-    } catch (Exception $e) {
+    } 
+    catch (Exception $e) 
+    {
         return [
             'status' => 'error',
             'message' => $e->getMessage(),
@@ -109,7 +122,8 @@ function detenerColaAutomatica()
 {
     $rutaPID = obtenerRutaPIDColaaAutomatica();
     
-    if (!file_exists($rutaPID)) {
+    if (!file_exists($rutaPID)) 
+    {
         return [
             'status' => 'no_ejecutandose',
             'message' => 'No hay proceso de cola_automatica en ejecución'
@@ -119,7 +133,8 @@ function detenerColaAutomatica()
     $pid = file_get_contents($rutaPID);
     $pid = trim($pid);
     
-    if (!empty($pid) && is_numeric($pid)) {
+    if (!empty($pid) && is_numeric($pid)) 
+    {
         shell_exec("kill " . (int)$pid . " 2>/dev/null");
         sleep(1); // Darle tiempo para terminar
     }
@@ -190,7 +205,8 @@ function estamosEnPeriodoDeApertura($horarios)
  */
 function yaDebioCerrar($horarios)
 {
-    if (!$horarios) {
+    if (!$horarios) 
+    {
         return false;
     }
     
@@ -214,7 +230,8 @@ function yaDebioCerrar($horarios)
  */
 function yaEsHoraDeAbrir($horarios)
 {
-    if (!$horarios) {
+    if (!$horarios) 
+    {
         return false;
     }
     

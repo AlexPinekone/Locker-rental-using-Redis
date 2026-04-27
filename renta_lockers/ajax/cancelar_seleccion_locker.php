@@ -4,7 +4,8 @@ session_start();
 
 require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 
-if (!isset($_SESSION['clvuni'])) {
+if (!isset($_SESSION['clvuni'])) 
+{
     echo json_encode(['status' => 'error', 'message' => 'Sesión no válida']);
     exit;
 }
@@ -15,7 +16,8 @@ try {
     require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
     require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
 
-    if (isset($error_redis) && $error_redis) {
+    if (isset($error_redis) && $error_redis) 
+    {
         throw new Exception($error_redis);
     }
 
@@ -36,7 +38,9 @@ try {
         'message' => 'Selección cancelada. Pasando al siguiente alumno.',
         'clvuni' => $clvuni_seguro
     ]);
-} catch (Exception $e) {
+} 
+catch (Exception $e) 
+{
     echo json_encode([
         'status' => 'error',
         'message' => 'Error: ' . $e->getMessage()

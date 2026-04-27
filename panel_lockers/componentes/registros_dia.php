@@ -13,7 +13,7 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
         <button class="btn btn-default" onclick="limpiarBusqueda()">
             Limpiar
         </button>
-        <span id="estado-actualizacion" class="text-muted" style="font-size: 12px;">
+        <span id="estado-actualizacion" class="text-muted" style="font-size: 12px; color: #009900;">
             Actualizando automáticamente
         </span>
     </div>

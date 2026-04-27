@@ -4,17 +4,20 @@ session_start();
 
 require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 
-if (!isset($_SESSION['clvuni'])) {
+if (!isset($_SESSION['clvuni'])) 
+{
     echo json_encode(['status' => 'error', 'message' => 'Sesión no válida']);
     exit;
 }
 
 $clvuni = $_SESSION['clvuni'];
 
-try {
+try 
+{
     require($_SERVER['DOCUMENT_ROOT'].'/renta_lockers/redis/comun/conexion_redis.php');
 
-    if (isset($error_redis) && $error_redis) {
+    if (isset($error_redis) && $error_redis) 
+    {
         throw new Exception($error_redis);
     }
 
@@ -30,7 +33,9 @@ try {
         'message' => 'Sesión de selección finalizada',
         'clvuni' => $clvuni_seguro
     ]);
-} catch (Exception $e) {
+} 
+catch (Exception $e) 
+{
     echo json_encode([
         'status' => 'error',
         'message' => 'Error: ' . $e->getMessage()

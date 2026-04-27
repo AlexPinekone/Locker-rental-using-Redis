@@ -4,17 +4,20 @@ session_start();
 
 require('../comun/conexion_redis.php');
 
-if (isset($error_redis) && $error_redis) {
+if (isset($error_redis) && $error_redis) 
+{
     echo json_encode(['status' => 'error', 'message' => $error_redis]);
     exit;
 }
 
-if ($redis->get('config:estado_sistema') !== 'abierto') {
+if ($redis->get('config:estado_sistema') !== 'abierto') 
+{
     echo json_encode(['status' => 'error', 'message' => 'El sistema ya está cerrado.']);
     exit;
 }
 
-try {
+try 
+{
     // Marcar como cerrado
     $redis->set('config:estado_sistema', 'cerrado');
     $redis->set('config:fecha_cierre', date('Y-m-d H:i:s'));
@@ -24,15 +27,19 @@ try {
     $redis->del('contador:turno');
 
     // Limpiar archivos temporales si existen
-    if (is_dir(LOCKER_TEMP)) {
+    if (is_dir(LOCKER_TEMP)) 
+    {
         $archivos = scandir(LOCKER_TEMP);
-        foreach ($archivos as $archivo) {
-            if ($archivo === '.' || $archivo === '..') {
+        foreach ($archivos as $archivo) 
+        {
+            if ($archivo === '.' || $archivo === '..') 
+            {
                 continue;
             }
 
             $rutaArchivo = LOCKER_TEMP . '/' . $archivo;
-            if (is_file($rutaArchivo)) {
+            if (is_file($rutaArchivo)) 
+            {
                 @unlink($rutaArchivo);
             }
         }

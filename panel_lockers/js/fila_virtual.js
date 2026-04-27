@@ -12,6 +12,7 @@ function vincularEventosCola()
     $('#btn-cerrar-lockers').off('click').on('click', cerrarSistemaLockers);
 }
 
+// Funcion para mover la cola de forma manual
 function atenderSiguiente() 
 {
     $('#btn-atender').prop('disabled', true);
@@ -41,6 +42,7 @@ function atenderSiguiente()
     });
 }
 
+// Para abrir el sistema de forma manual
 function abrirSistemaLockers() 
 {
     $('#btn-abrir-lockers').prop('disabled', true);
@@ -69,6 +71,7 @@ function abrirSistemaLockers()
     });
 }
 
+// Para cerrar el sistema de forma manual
 function cerrarSistemaLockers() 
 {
     if (!confirm('¿Estás seguro de que deseas cerrar el sistema? Se vaciará la cola activa.')) 
@@ -107,8 +110,7 @@ function cerrarSistemaLockers()
     });
 }
 
-// Funciones de registros
-
+// Funciones para mostrar los registros
 function vincularEventosRegistros() 
 {
     $('#buscar-clvuni').off('input').on('input', function() {
@@ -222,7 +224,6 @@ function obtenerTextoEstado(estado)
 }
 
 // Funciones de componentes
-
 function cargarComponenteColaActiva() 
 {
     $.get('componentes/cola_activa.php', function(html) {

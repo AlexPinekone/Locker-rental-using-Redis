@@ -5,7 +5,8 @@ session_start();
 
 require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 
-if (!isset($_SESSION['clvuni'])) {
+if (!isset($_SESSION['clvuni'])) 
+{
     echo json_encode(['status' => 'error', 'message' => 'Sesión no válida']);
     exit;
 }
@@ -16,7 +17,8 @@ $id_l = isset($_POST['id_l']) ? intval($_POST['id_l']) : null;
 $ciclo = isset($_POST['ciclo']) ? trim($_POST['ciclo']) : null;
 
 // Validar parámetros
-if (!$clvuni || !$id_l || !$ciclo) {
+if (!$clvuni || !$id_l || !$ciclo) 
+{
     echo json_encode([
         'status' => 'error',
         'message' => 'Parámetros incompletos',
@@ -30,7 +32,8 @@ if (!$clvuni || !$id_l || !$ciclo) {
 }
 
 // Validar que el usuario de sesión coincida
-if ($_SESSION['clvuni'] != $clvuni) {
+if ($_SESSION['clvuni'] != $clvuni) 
+{
     echo json_encode(['status' => 'error', 'message' => 'Validación de usuario fallida']);
     exit;
 }
@@ -50,7 +53,8 @@ try
 
     // Leer el archivo JSON de fila
     $datosFila = [];
-    if (file_exists($nombreArchivoFila)) {
+    if (file_exists($nombreArchivoFila)) 
+    {
         $contenido = file_get_contents($nombreArchivoFila);
         $datosFila = json_decode($contenido, true) ?: [];
     }
@@ -58,7 +62,8 @@ try
     $resultadoAlumno = buscarRegistroAlumno($datosFila, $clvuni);
     $indiceAlumno = $resultadoAlumno['indice'];
 
-    if ($indiceAlumno === null) {
+    if ($indiceAlumno === null) 
+    {
         throw new Exception("El alumno no se encuentra en la fila");
     }
 
@@ -78,7 +83,9 @@ try
         'fecha_asignacion' => $datosFila[$indiceAlumno]['fecha_hora_asignacion']
     ]);
 
-} catch (Exception $e) {
+} 
+catch (Exception $e) 
+{
     echo json_encode([
         'status' => 'error',
         'message' => 'Error: ' . $e->getMessage()

@@ -24,7 +24,7 @@ require('redis/comun/conexion_redis.php');
 $estadoSistema = $redis->get('config:estado_sistema');
 $clvuni = isset($_SESSION['clvuni']) ? $_SESSION['clvuni'] : null;
 
-// NUEVA LÓGICA: Verificación de auto-apertura/cierre
+//  Verificación de auto-apertura/cierre
 // Incluir archivo de utilidades de procesos para verificar horarios
 require($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/procesos.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
@@ -535,7 +535,6 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
             const mensaje = `
                 <div id="alerta-congelacion" class="alert alert-warning" style="margin: 20px 0; border: 2px solid #ff9800;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="font-size: 32px;">❄️</div>
                         <div>
                             <h4 style="margin: 0; color: #ff6b00;">
                                 <strong>Cola Congelada</strong>
@@ -544,7 +543,7 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                                 No hay lockers disponibles en este momento.
                             </p>
                             <p style="margin: 10px 0 0 0; font-size: 12px; color: #ff6b00; font-weight: bold;">
-                                ⏳ Esperando disponibilidad de lockers...
+                                Puedes esperar en la fila hasta que alguien cancele su reservación.
                             </p>
                         </div>
                     </div>
@@ -568,7 +567,6 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
             const notificacion = $(`
                 <div class="alert alert-success" style="margin: 20px 0; border: 2px solid #28a745;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="font-size: 32px;">✅</div>
                         <div>
                             <h4 style="margin: 0; color: #28a745;">
                                 <strong>¡Cola Activa!</strong>

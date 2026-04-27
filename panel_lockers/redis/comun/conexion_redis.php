@@ -1,6 +1,4 @@
 <?php
-
-// Para compatibilidad con CLI y web
 $rootPath = !empty($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : '/var/www/html';
 require($rootPath . '/comun/variables.php');
 date_default_timezone_set('America/Mexico_City');

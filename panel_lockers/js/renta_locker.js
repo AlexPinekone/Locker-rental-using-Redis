@@ -2,6 +2,7 @@ $(document).ready(function() {
     cargarReservas();
 });
 
+//Obtener todas las reservas de lockers validas que hay en la base de datos
 function cargarReservas() 
 {
     $.getJSON('ajax/obtener_reservas.php')
@@ -55,7 +56,7 @@ function renderizarTabla(reservas)
     let areaActual = null;
 
     reservas.forEach(function(r) {
-        // Separador visual cuando cambia el área
+        // Separador visual cuando cambia el edificio
         if (r.area !== areaActual) 
         {
             areaActual = r.area;
@@ -131,7 +132,7 @@ function cambiarEstado(idReserva, nuevoEstado)
         if (data.status === 'success') 
         {
             mostrarMensaje('success', ' Estado actualizado correctamente.');
-            cargarReservas(); // recargar tabla
+            cargarReservas();
         } 
         else 
         {

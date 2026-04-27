@@ -76,9 +76,7 @@ catch (Exception $e)
 }
 
 // Al final del archivo, después de abrir el sistema
-// NOTA: La cola automática es iniciada por dashboard.php cuando es hora de apertura
-// No debe ser iniciada aquí para evitar múltiples instancias
-// exec('cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > /tmp/cola_automatica.log 2>&1 &');
-// Usando una ruta absoluta y un directorio con permisos de escritura para www-data
+// La cola automática es iniciada por dashboard.php cuando es hora de apertura
+// No debe ser iniciada aquí, la dejo por si acaso
 // exec('cd /var/www/html/panel_lockers/redis/sistema && nohup php cola_automatica.php > /tmp/cola_automatica.log 2>&1 &');
 ?>

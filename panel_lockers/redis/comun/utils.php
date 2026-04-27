@@ -488,7 +488,8 @@ function buscarRegistroAlumnoCicloCompleto($redis, $clvuni)
  * @param object $redis - Conexión a Redis
  * @return bool - True si se atendió a alguien, false si no
  */
-function atenderSiguienteAutomatico($redis) {
+function atenderSiguienteAutomatico($redis) 
+{
     global $nombreCola;
     $claveSeleccionando = 'locker:seleccionando';
     
@@ -497,7 +498,8 @@ function atenderSiguienteAutomatico($redis) {
         //verificar si la cola está congelada antes de intentar atender
         require('/var/www/html/comun/conectar.php');
         
-        if (!hayLockersDisponiblesDirecto($dbh)) {
+        if (!hayLockersDisponiblesDirecto($dbh)) 
+        {
             error_log(" Intento de atender siguiente bloqueado: No hay lockers disponibles");
             mysqli_close($dbh);
             return false;
@@ -508,13 +510,15 @@ function atenderSiguienteAutomatico($redis) {
         $ocupados = $redis->hLen($claveSeleccionando);
 
         //Verificar que la seleccion este vacia para atender al siguiente
-        if ($ocupados > 0) {
+        if ($ocupados > 0) 
+        {
             return false;
         }
 
         $itemJson = $redis->lPop($nombreCola);
 
-        if ($itemJson) {
+        if ($itemJson) 
+        {
             $datosAlumno = json_decode($itemJson, true);
             $clvuni = $datosAlumno['clvuni'];
             $turno = $datosAlumno['turno'];
@@ -539,7 +543,8 @@ function atenderSiguienteAutomatico($redis) {
             $indiceRegistro = $resultado['indice'];
 
             // Si no lo encuentra, crear uno nuevo
-            if (!$registroCompleto) {
+            if (!$registroCompleto) 
+            {
                 $registroCompleto = crearNuevoRegistro($clvuni, $turno);
                 $indiceRegistro = count($datosFila);
             }
@@ -555,10 +560,14 @@ function atenderSiguienteAutomatico($redis) {
 
             error_log("Alumno $clvuni movido automáticamente a selección de locker");
             return true;
-        } else {
+        } 
+        else 
+        {
             return false;
         }
-    } catch (Exception $e) {
+    } 
+    catch (Exception $e) 
+    {
         error_log("Error en atenderSiguienteAutomatico: " . $e->getMessage());
         return false;
     }
@@ -570,16 +579,19 @@ function atenderSiguienteAutomatico($redis) {
  * @param object $redis - Conexión a Redis
  * @return bool - True si se atendió a alguien, false si no
  */
-function atenderSiguienteManual($redis) {
+function atenderSiguienteManual($redis) 
+{
     global $nombreCola;
     $claveSeleccionando = 'locker:seleccionando';
     
-    try {
+    try 
+    {
 
         //Verificar si la cola está congelada
         require('/var/www/html/comun/conectar.php');
         
-        if (!hayLockersDisponiblesDirecto($dbh)) {
+        if (!hayLockersDisponiblesDirecto($dbh)) 
+        {
             error_log(" Intento de atender siguiente bloqueado: No hay lockers disponibles");
             mysqli_close($dbh);
             return false;
@@ -591,7 +603,8 @@ function atenderSiguienteManual($redis) {
 
         $itemJson = $redis->lPop($nombreCola);
 
-        if ($itemJson) {
+        if ($itemJson) 
+        {
             $datosAlumno = json_decode($itemJson, true);
             $clvuni = $datosAlumno['clvuni'];
             $turno = $datosAlumno['turno'];
@@ -616,7 +629,8 @@ function atenderSiguienteManual($redis) {
             $indiceRegistro = $resultado['indice'];
 
             // Si no lo encuentra, crear uno nuevo
-            if (!$registroCompleto) {
+            if (!$registroCompleto) 
+            {
                 $registroCompleto = crearNuevoRegistro($clvuni, $turno);
                 $indiceRegistro = count($datosFila);
             }
@@ -637,7 +651,9 @@ function atenderSiguienteManual($redis) {
         {
             return false;
         }
-    } catch (Exception $e) {
+    } 
+    catch (Exception $e) 
+    {
         error_log("Error en atenderSiguienteManual: " . $e->getMessage());
         return false;
     }
@@ -649,12 +665,15 @@ function atenderSiguienteManual($redis) {
  * @param mysqli $dbh - Conexión a base de datos
  * @return bool - True si hay disponibles, False si no
  */
-function hayLockersDisponiblesDirecto($dbh) {
-    try {
+function hayLockersDisponiblesDirecto($dbh) 
+{
+    try 
+    {
         // Total de lockers activos
         $queryTotal = "SELECT COUNT(*) as total FROM plantilla.loc_locker WHERE activo = 1";
         $resTotal = mysqli_query($dbh, $queryTotal);
-        if (!$resTotal) {
+        if (!$resTotal) 
+        {
             error_log("Error en query de lockers totales: " . mysqli_error($dbh));
             return false;
         }
@@ -666,7 +685,8 @@ function hayLockersDisponiblesDirecto($dbh) {
                             FROM plantilla.loc_reserva 
                             WHERE estado IN (1,3)";
         $resReservados = mysqli_query($dbh, $queryReservados);
-        if (!$resReservados) {
+        if (!$resReservados) 
+        {
             error_log("Error en query de lockers reservados: " . mysqli_error($dbh));
             return false;
         }
@@ -677,7 +697,9 @@ function hayLockersDisponiblesDirecto($dbh) {
         error_log("Verificación de lockers: Disponibles=$disponibles, Total=$total, Reservados=$reservados");
         
         return ($reservados < $total);
-    } catch (Exception $e) {
+    } 
+    catch (Exception $e) 
+    {
         error_log("Error en hayLockersDisponiblesDirecto: " . $e->getMessage());
         return false;
     }

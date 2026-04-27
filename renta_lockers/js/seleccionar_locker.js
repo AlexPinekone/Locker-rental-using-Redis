@@ -1,5 +1,5 @@
 /**
- * seleccionar_locker.js - MODIFICADO
+ * seleccionar_locker.js
  * Lógica completa para la selección de lockers
  */
 
