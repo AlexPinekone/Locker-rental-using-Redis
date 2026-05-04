@@ -13,9 +13,14 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
         <button class="btn btn-default" onclick="limpiarBusqueda()">
             Limpiar
         </button>
+        
         <span id="estado-actualizacion" class="text-muted" style="font-size: 12px; color: #009900;">
             Actualizando automáticamente
         </span>
+
+        <button class="btn btn-success" onclick="generarExcel()">
+            Generar Excel de Todos los Registros
+        </button>
     </div>
     
     <div style="height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; background: #fff;">
@@ -55,3 +60,28 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
         * Mostrando todos los registros en fila del día.
     </p>
 </div>
+
+<script>
+function generarExcel() {
+    fetch('/panel_lockers/ajax/reporte_todos_registros_xlsx.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al generar el Excel: ' + response.statusText);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'reporte_todos_registros.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+}
+</script>

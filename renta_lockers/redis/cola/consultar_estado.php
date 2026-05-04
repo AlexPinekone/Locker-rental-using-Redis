@@ -111,7 +111,8 @@ if ($clvuni)
         $fechaCongelacion = $redis->get('cola:fecha_congelacion');
         
         // Si la cola está congelada, devolver el estado de congelación
-        if ($colaCongelada) {
+        if ($colaCongelada) 
+        {
             echo json_encode([
                 'status'  => 'cola_congelada',
                 'message' => 'La cola está congelada por falta de lockers disponibles',

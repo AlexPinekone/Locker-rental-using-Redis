@@ -1,0 +1,50 @@
+[
+    {
+        "clvuni": "328197",
+        "turno": 1,
+        "nombres": "Rpv7Mn61QheDfsl",
+        "ape_pat": "KWIsPgXdZbip",
+        "ape_mat": "YpljSroXMtdW",
+        "estado": 3,
+        "locker": 9,
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-04-27 17:44:57",
+        "fecha_hora_asignacion": "2026-04-27 17:45:39"
+    },
+    {
+        "clvuni": "328619",
+        "turno": 2,
+        "nombres": "kUVxgye9iR6ulwz",
+        "ape_pat": "XUVGwSlWKDgs",
+        "ape_mat": "UQturcoGyqpk",
+        "estado": 5,
+        "locker": "-",
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-04-27 17:45:06",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "329467",
+        "turno": 3,
+        "nombres": "wsKXT7mdrlY1Fn2",
+        "ape_pat": "CpEOHTcWQXJm",
+        "ape_mat": "WIDkaSBojxUi",
+        "estado": 5,
+        "locker": "-",
+        "posicion_entrada": 1,
+        "fecha_hora_entrada": "2026-04-27 17:45:23",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "329646",
+        "turno": 4,
+        "nombres": "T2c8kgJhK4PUQau",
+        "ape_pat": "NlpPByIguZqs",
+        "ape_mat": "WpSjQrIwNqRs",
+        "estado": 5,
+        "locker": "-",
+        "posicion_entrada": 2,
+        "fecha_hora_entrada": "2026-04-27 17:45:52",
+        "fecha_hora_asignacion": "-"
+    }
+]

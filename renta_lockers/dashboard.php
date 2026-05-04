@@ -31,12 +31,15 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
 require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
 
 // Verificar si es hora de apertura y abrir automáticamente si es necesario
-if ($estadoSistema !== 'abierto') {
+if ($estadoSistema !== 'abierto') 
+{
     $horarios = obtenerHorariosConfig($dbh);
     
-    if ($horarios && estamosEnPeriodoDeApertura($horarios)) {
+    if ($horarios && estamosEnPeriodoDeApertura($horarios)) 
+    {
         // Es hora de apertura, abrir automáticamente
-        if (!isset($_SESSION['ciclo'])) {
+        if (!isset($_SESSION['ciclo'])) 
+        {
             $_SESSION['ciclo'] = 'sin-ciclo-definido';
         }
         
@@ -46,7 +49,8 @@ if ($estadoSistema !== 'abierto') {
         $fechaHoy = date('Y-m-d');
         
         // Crear carpetas si no existen
-        if (!is_dir(LOCKER_TEMP)) {
+        if (!is_dir(LOCKER_TEMP)) 
+        {
             mkdir(LOCKER_TEMP, 0755, true);
         }
         
@@ -58,8 +62,10 @@ if ($estadoSistema !== 'abierto') {
         ];
         
         // Buscar si ya están los archivos, si no crea un json[] o un jsonl vacío
-        foreach ($archivos as $ruta) {
-            if (!file_exists($ruta)) {
+        foreach ($archivos as $ruta) 
+        {
+            if (!file_exists($ruta)) 
+            {
                 $esJson = str_ends_with($ruta, '.json');
                 file_put_contents($ruta, $esJson ? '[]' : '');
             }
@@ -82,7 +88,8 @@ if ($estadoSistema !== 'abierto') {
 }
 
 // Cerrar conexión después de verificación de horarios
-if (isset($dbh)) {
+if (isset($dbh)) 
+{
     mysqli_close($dbh);
 }
 
@@ -94,7 +101,7 @@ if ($estadoSistema !== 'abierto')
     // Obtener información de fecha y hora de apertura desde la base de datos
     require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
     
-    $query = "SELECT fecha_ini, hora_ini FROM loc_config LIMIT 1";
+    $query = "SELECT fecha_ini, hora_ini, fecha_fin, hora_fin FROM loc_config LIMIT 1";
     $result = mysqli_query($dbh, $query);
     
     if ($result && mysqli_num_rows($result) > 0) 
@@ -102,13 +109,15 @@ if ($estadoSistema !== 'abierto')
         $row = mysqli_fetch_assoc($result);
         $fechaApertura = $row['fecha_ini'];
         $horaApertura = $row['hora_ini'];
+        $fechaCierre = $row['fecha_fin'];
+        $horaCierre = $row['hora_fin'];
     }
     
     mysqli_close($dbh);
 } 
 else if ($clvuni) 
 {
-    // Sistema abierto - Verificar estado del alumno
+    // Sistema abierto: Verificar estado del alumno
     
     // Buscar si tiene locker reservado
     require($_SERVER['DOCUMENT_ROOT'].'/comun/conectar.php');
@@ -138,13 +147,14 @@ else if ($clvuni)
     {
         require_once($_SERVER['DOCUMENT_ROOT'].'/panel_lockers/redis/comun/utils.php');
 
-        // Usar el nombre de cola global definido en conexion_redis.php
+        // Nombre de cola global definido en conexion_redis.php
         global $nombreCola;
 
         $lista = $redis->lRange($nombreCola, 0, -1);
 
         $usuarioEnCola = false;
-        foreach ($lista as $idx => $item) {
+        foreach ($lista as $idx => $item) 
+        {
             $itemDecodificado = json_decode($item, true);
             if (isset($itemDecodificado['clvuni']) && $itemDecodificado['clvuni'] === $clvuni) 
             {
@@ -152,8 +162,7 @@ else if ($clvuni)
                 $turnoActual = $itemDecodificado['turno']; 
                 $posicionEnCola = $idx;
 
-                // Verificar si está siendo atendido
-                // CAMBIO
+                // Verificar si está siendo atendido *Sujeto a cambios
                 if ($posicionEnCola === 0) 
                 {
                     $estadoAlumno = 'seleccionando';
@@ -363,7 +372,8 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
 
             $.post('redis/cola/unirse_cola.php')
                 .done(function(data) {
-                    if (data.status === 'sistema_cerrado') {
+                    if (data.status === 'sistema_cerrado') 
+                    {
                         $('#cola-estado').html(`
                             <div class="alert alert-warning">
                                 <h4>Sistema no disponible</h4>
@@ -373,7 +383,8 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                         `);
                         return;
                     }
-                    if (data.status === 'error') {
+                    if (data.status === 'error') 
+                    {
                         $('#cola-estado').html(`
                             <p style="color:red;">Error al unirse a la cola: ${data.message}</p>
                             <a href="dashboard.php" class="btn btn-danger">Volver</a>
@@ -383,9 +394,12 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                     estadoAlumno = 'cola';
                     revisarTurno();
                     intervalo = setInterval(() => {
-                        if (document.querySelector('#atendido')) {
+                        if (document.querySelector('#atendido')) 
+                        {
                             clearInterval(intervalo);
-                        } else {
+                        } 
+                        else 
+                        {
                             revisarTurno();
                         }
                     }, 3000);
@@ -399,16 +413,20 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                 });
         }
 
-        function salirCola() {
+        function salirCola() 
+        {
             if (confirm('¿Estás seguro de que deseas salir de la cola?')) {
                 $.post('redis/cola/salir_cola.php')
                     .done(function(data) {
-                        if (data.status === 'success') {
+                        if (data.status === 'success') 
+                        {
                             $('#cola-estado').html(`
                                 <p style="color:green; font-weight:bold;">Has salido de la cola correctamente</p>
                                 <a href="dashboard.php" class="btn btn-primary">Volver al panel</a>
                             `);
-                        } else {
+                        } 
+                        else 
+                        {
                             alert('Error: ' + data.message);
                         }
                     })
@@ -418,14 +436,18 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
             }
         }
 
-        function cancelarReservaConfirm() {
+        function cancelarReservaConfirm() 
+        {
             if (confirm('¿Estás seguro de que deseas cancelar tu reserva? Esta acción no se puede deshacer.')) {
                 $.post('ajax/cancelar_reserva.php')
                     .done(function(data) {
-                        if (data.status === 'success') {
+                        if (data.status === 'success') 
+                        {
                             alert('Tu reserva ha sido cancelada correctamente.');
                             window.location.href = 'dashboard.php';
-                        } else {
+                        } 
+                        else 
+                        {
                             alert('Error: ' + data.message);
                         }
                     })
@@ -435,39 +457,46 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
             }
         }
 
-        function mostrarCola(turno, personasDelante) {
+        function mostrarCola(turno, personasDelante) 
+        {
             $('#contenedor-estado').hide();
             $('#cola-estado').show();
             $('#turno').text(turno || '...');
             $('#numero_delante').text(typeof personasDelante !== 'undefined' ? personasDelante : '...');
         }
 
-        function ocultarCola() {
+        function ocultarCola() 
+        {
             $('#cola-estado').hide();
             $('#contenedor-estado').show();
         }
 
-        function revisarTurno() {
+        function revisarTurno() 
+        {
         $.getJSON('redis/cola/consultar_estado.php')
             .done(function(data) {
                 // Verificar congelacion de la cola
-                if (data.status === 'cola_congelada') {
+                if (data.status === 'cola_congelada') 
+                {
                     if (!colaCongeladaMostrada) {
                         mostrarAlertaCongelacion(data);
                         colaCongeladaMostrada = true;
                     }
+                    mostrarCola(data.turno, data.personas_delante);
                     return; // No continuar procesando
                 }
                 
                 // Si se descongela, mostrar notificación
-                if (colaCongeladaMostrada && data.status !== 'cola_congelada') {
+                if (colaCongeladaMostrada && data.status !== 'cola_congelada') 
+                {
                     ocultarAlertaCongelacion();
                     mostrarNotificacionDescongelada();
                     colaCongeladaMostrada = false;
                 }
                 
-                // Resto de lógica original
-                if (data.status === 'sistema_cerrado') {
+                // Salir
+                if (data.status === 'sistema_cerrado') 
+                {
                     clearInterval(intervalo);
                     $('#cola-estado').html(`
                         <div class="alert alert-warning">
@@ -478,13 +507,16 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
                         <a href="dashboard.php" class="btn btn-secondary">Volver</a>
                     `);
                 }
-                else if (data.status === 'atendido') {
+                else if (data.status === 'atendido') 
+                {
                     ocultarCola();
                 }
-                else if (data.status === 'seleccionando') {
+                else if (data.status === 'seleccionando') 
+                {
                     window.location.href = 'seleccionar_locker.php';
                 }
-                else if (data.status === 'esperando') {
+                else if (data.status === 'esperando') 
+                {
                     mostrarCola(data.turno, data.personas_delante);
                 }
             })
@@ -531,7 +563,8 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
         let colaCongeladaMostrada = false;
 
         // Mostrar alerta cuando está congelada
-        function mostrarAlertaCongelacion(data) {
+        function mostrarAlertaCongelacion(data) 
+        {
             const mensaje = `
                 <div id="alerta-congelacion" class="alert alert-warning" style="margin: 20px 0; border: 2px solid #ff9800;">
                     <div style="display: flex; align-items: center; gap: 15px;">
@@ -556,14 +589,16 @@ $nombreCompleto = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_comple
         }
 
         // Ocultar alerta de congelación
-        function ocultarAlertaCongelacion() {
+        function ocultarAlertaCongelacion() 
+        {
             $('#alerta-congelacion').fadeOut(300, function() {
                 $(this).remove();
             });
         }
 
         // Notificación cuando se descongela
-        function mostrarNotificacionDescongelada() {
+        function mostrarNotificacionDescongelada() 
+        {
             const notificacion = $(`
                 <div class="alert alert-success" style="margin: 20px 0; border: 2px solid #28a745;">
                     <div style="display: flex; align-items: center; gap: 15px;">

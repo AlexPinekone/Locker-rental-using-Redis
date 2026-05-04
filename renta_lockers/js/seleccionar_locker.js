@@ -1,6 +1,5 @@
 /**
- * seleccionar_locker.js
- * Lógica completa para la selección de lockers
+ * Lógica para la selección de lockers
  */
 
 // Variables globales
@@ -14,7 +13,8 @@ let ciclo = '';
 /**
  * Inicializar la página
  */
-function inicializarSeleccionador(clvuniParam, cicloParam, lockersReservadosParam, edificiosDataParam) {
+function inicializarSeleccionador(clvuniParam, cicloParam, lockersReservadosParam, edificiosDataParam) 
+{
     clvuni = clvuniParam;
     ciclo = cicloParam;
     lockersReservados = lockersReservadosParam;
@@ -22,9 +22,12 @@ function inicializarSeleccionador(clvuniParam, cicloParam, lockersReservadosPara
     tiempoRestante = null;
 
     // Generar mapas para todos los edificios
-    if (edificiosDataParam) {
-        for (let edificio in edificiosDataParam) {
-            if (edificiosDataParam.hasOwnProperty(edificio)) {
+    if (edificiosDataParam) 
+    {
+        for (let edificio in edificiosDataParam) 
+        {
+            if (edificiosDataParam.hasOwnProperty(edificio)) 
+            {
                 generarMapa(edificio, edificiosDataParam[edificio], lockersReservados);
             }
         }
@@ -103,9 +106,11 @@ function generarMapa(edificio, lockers, reservados)
 function seleccionarLocker(locker) 
 {
     // Quitar clase del anterior usando el ID único
-    if (lockersSeleccionado) {
+    if (lockersSeleccionado) 
+    {
         const btnAnterior = document.getElementById('locker-node-' + lockersSeleccionado.id);
-        if (btnAnterior) {
+        if (btnAnterior) 
+        {
             btnAnterior.classList.remove('seleccionado');
         }
     }
@@ -113,7 +118,8 @@ function seleccionarLocker(locker)
     // Marcar el nuevo
     lockersSeleccionado = locker;
     const btnNuevo = document.getElementById('locker-node-' + locker.id);
-    if (btnNuevo) {
+    if (btnNuevo) 
+    {
         btnNuevo.classList.add('seleccionado');
     }
 
@@ -125,7 +131,8 @@ function seleccionarLocker(locker)
  */
 function confirmarSeleccion() 
 {
-    if (lockersSeleccionado) {
+    if (lockersSeleccionado) 
+    {
         document.getElementById('lockersSeleccionadoInfo').textContent = 
             `Locker #${lockersSeleccionado.numero} - Edificio ${lockersSeleccionado.edificio}`;
         document.getElementById('confirmationModal').classList.add('active');
@@ -135,15 +142,18 @@ function confirmarSeleccion()
 /**
  * Cancelar modal
  */
-function cancelarModal() {
+function cancelarModal() 
+{
     document.getElementById('confirmationModal').classList.remove('active');
 }
 
 /**
  * Confirmar final y guardar reserva
  */
-function confirmarFinal() {
-    if (lockersSeleccionado) {
+function confirmarFinal() 
+{
+    if (lockersSeleccionado) 
+    {
         guardarReserva(lockersSeleccionado);
     }
 }
@@ -152,16 +162,20 @@ function obtenerTiempoDesdeServidor()
 {
     $.getJSON('redis/cola/consultar_estado.php')
         .done(function(data) {
-            if ((data.status === 'esperando' && data.posicion === 0 && data.tiempo_restante != null) || data.status === 'seleccionando') {
+            if ((data.status === 'esperando' && data.posicion === 0 && data.tiempo_restante != null) || data.status === 'seleccionando') 
+                {
                 tiempoRestante = parseInt(data.tiempo_restante, 10);
                 
-                if (isNaN(tiempoRestante)) {
+                if (isNaN(tiempoRestante)) 
+                {
                     tiempoRestante = 0;
                 }
 
                 actualizarTimerDisplay();
                 iniciarTimer();
-            } else {
+            } 
+            else 
+            {
                 tiempoRestante = null;
                 actualizarTimerDisplay();
             }
@@ -173,11 +187,13 @@ function obtenerTiempoDesdeServidor()
         });
 }
 
-function actualizarTimerDisplay() {
+function actualizarTimerDisplay() 
+{
     const timerDisplay = document.getElementById('timerDisplay');
     if (!timerDisplay) return;
 
-    if (tiempoRestante === null || tiempoRestante < 0) {
+    if (tiempoRestante === null || tiempoRestante < 0) 
+    {
         timerDisplay.textContent = '00:00';
         timerDisplay.classList.remove('warning');
         return;
@@ -187,9 +203,12 @@ function actualizarTimerDisplay() {
     const segundos = tiempoRestante % 60;
     timerDisplay.textContent = String(minutos).padStart(2, '0') + ':' + String(segundos).padStart(2, '0');
 
-    if (tiempoRestante <= 30) {
+    if (tiempoRestante <= 30) 
+    {
         timerDisplay.classList.add('warning');
-    } else {
+    } 
+    else 
+    {
         timerDisplay.classList.remove('warning');
     }
 }
@@ -197,14 +216,20 @@ function actualizarTimerDisplay() {
 /**
  * Cancelar y volver al dashboard
  */
-function cancelarSeleccion() {
-    if (confirm('¿Deseas cancelar la selección y volver al panel?')) {
+function cancelarSeleccion() 
+{
+    if (confirm('¿Deseas cancelar la selección y volver al panel?')) 
+    {
         // Cancelar la selección: cambiar estado a 5 y remover de Redis
         $.post('ajax/cancelar_seleccion_locker.php')
-            .done(function(data) {
-                if (data.status === 'success') {
+            .done(function(data) 
+            {
+                if (data.status === 'success') 
+                {
                     window.location.href = 'dashboard.php';
-                } else {
+                } 
+                else 
+                {
                     alert('Error: ' + data.message);
                     window.location.href = 'dashboard.php';
                 }
@@ -219,8 +244,8 @@ function cancelarSeleccion() {
 /**
  * Guardar reserva en la base de datos y actualizar JSON de fila
  */
-function guardarReserva(locker) {
-
+function guardarReserva(locker) 
+{
     // Primero: Guardar en la BD (plantilla.loc_reserva)
     $.post('ajax/reservar_locker.php', {
         id_l: locker.id,        // ID único de la BD
@@ -228,9 +253,12 @@ function guardarReserva(locker) {
         ciclo: ciclo
     })
     .done(function(data) {
-        if (data.status === 'success') {
+        if (data.status === 'success') 
+        {
             actualizarLockerEnJSON(locker);
-        } else {
+        } 
+        else 
+        {
             alert('Error: ' + data.message);
         }
     })
@@ -243,9 +271,11 @@ function guardarReserva(locker) {
  * Actualizar el archivo JSON de fila con el locker seleccionado
  * Formato del locker: "Edificio-Numero" (ej: "A-5", "B-12")
  */
-function actualizarLockerEnJSON(locker) {
+function actualizarLockerEnJSON(locker) 
+{
     
-    if (!locker || typeof locker.id === 'undefined' || locker.id === null) {
+    if (!locker || typeof locker.id === 'undefined' || locker.id === null) 
+    {
         console.error('Locker id missing antes de enviar solicitud:', locker);
         alert('Error interno: no se encontró el ID del locker. Por favor intenta de nuevo.');
         return;
@@ -256,16 +286,20 @@ function actualizarLockerEnJSON(locker) {
         id_l: locker.id,
         ciclo: ciclo
     })
-    .done(function(data) {
+    .done(function(data) 
+    {
         console.log('actualizar_locker_json response:', data);
-        if (data.status === 'success') {
+        if (data.status === 'success') 
+        {
             // Locker actualizado en JSON y BD
             document.getElementById('confirmationModal').classList.remove('active');
             alert('¡Locker reservado exitosamente!');
             
             // Limpiar sesión de tiempo y redirigir
             window.location.href = 'dashboard.php';
-        } else {
+        } 
+        else 
+        {
             console.error('actualizar_locker_json error:', data);
             // Si falla la actualización del JSON, mostrar error pero la BD ya tiene el dato
             console.warn('Advertencia: El locker se guardó en BD pero hubo error al actualizar JSON: ' + data.message);
@@ -283,13 +317,16 @@ function actualizarLockerEnJSON(locker) {
 /**
  * Iniciar contador de 2 minutos
  */
-function iniciarTimer() {
-    if (intervaloTimer) {
+function iniciarTimer() 
+{
+    if (intervaloTimer) 
+    {
         clearInterval(intervaloTimer);
     }
 
     const timerDisplay = document.getElementById('timerDisplay');
-    if (!timerDisplay || tiempoRestante === null) {
+    if (!timerDisplay || tiempoRestante === null) 
+    {
         return;
     }
 
@@ -298,7 +335,8 @@ function iniciarTimer() {
         
         actualizarTimerDisplay();
         
-        if (tiempoRestante <= 0) {
+        if (tiempoRestante <= 0) 
+        {
             clearInterval(intervaloTimer);
             tiempoAgotado();
         }
@@ -308,7 +346,8 @@ function iniciarTimer() {
 /**
  * Manejar cuando se agota el tiempo
  */
-function tiempoAgotado() {
+function tiempoAgotado() 
+{
     alert('Se ha agotado el tiempo para seleccionar un locker.');
 
     // El estado será actualizado automáticamente por cola_automatica.php
@@ -325,7 +364,8 @@ function tiempoAgotado() {
 /**
  * Configurar event listeners cuando el DOM esté listo
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() 
+{
     // Botón confirmar selección
     const btnConfirmarSeleccion = document.getElementById('btnConfirmarSeleccion');
     if (btnConfirmarSeleccion) {

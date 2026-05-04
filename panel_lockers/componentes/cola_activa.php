@@ -6,12 +6,14 @@ require($_SERVER['DOCUMENT_ROOT'].'/comun/variables.php');
 <div style="margin-bottom: 30px;">
 
     <div style="margin: 20px 0; text-align: center;">
+        <!--
         <button class="btn btn-info btn-lg" id="btn-abrir-lockers" style="width: 200px;">
             Abrir Sistema
         </button>
         <button class="btn btn-danger btn-lg" id="btn-cerrar-lockers" style="width: 200px; margin-left: 10px;">
             Cerrar Sistema
         </button>
+        -->
         <div id="mensaje-sistema-lockers" style="margin-top: 10px;"></div>
     </div>
 
