@@ -1,112 +1,117 @@
 # Locker-rental-using-Redis
- 
-Sistema web para la administración y renta de lockers mediante una fila virtual en tiempo real utilizando Redis y PHP.
- 
+
+A web-based system for managing and renting lockers through a real-time virtual queue using Redis and PHP.
+
 ---
- 
-## Características
- 
-- Fila virtual FIFO en tiempo real
-- Gestión automática de turnos
-- Selección interactiva de lockers
-- Panel de administración
-- Persistencia en MySQL
-- Logs en JSON
-- Cache y sincronización con Redis
+
+## Features
+
+- Real-time FIFO virtual queue
+- Automatic turn management
+- Interactive locker selection
+- Administration panel
+- MySQL persistence
+- JSON logging
+- Redis cache and synchronization
+
 ---
- 
-## Arquitectura
- 
-El sistema sigue una arquitectura monolítica modular:
- 
+
+## Architecture
+
+The system follows a modular monolithic architecture:
+
 - **Frontend:** HTML, CSS, JavaScript, jQuery
 - **Backend:** PHP
-- **Base de datos:** MySQL
-- **Cola y cache:** Redis
-- **Servidor web:** Apache
+- **Database:** MySQL
+- **Queue & cache:** Redis
+- **Web server:** Apache
+
 ---
- 
-## Stack Tecnológico
- 
+
+## Tech Stack
+
 - PHP 7.4+
 - MySQL
 - Redis 6+
 - Apache
 - JavaScript
 - jQuery 3.4.1
+
 ---
- 
-## Instalación
- 
-### 1. Clonar el repositorio
- 
+
+## Installation
+
+### 1. Clone the repository
+
 ```bash
 git clone ...
 ```
- 
-### 2. Configurar Apache
- 
+
+### 2. Configure Apache
+
 ```bash
 sudo chown -R www-data:www-data /var/www/html/panel_lockers
 sudo chmod -R 775 /var/www/html/panel_lockers
 ```
- 
-### 3. Iniciar Redis
- 
+
+### 3. Start Redis
+
 ```bash
 sudo systemctl start redis
 ```
- 
-### 4. Configurar MySQL
- 
-- Crear la base de datos
-- Importar el script SQL
+
+### 4. Configure MySQL
+
+- Create the database
+- Import the SQL script
+
 ---
- 
-## Estructura del Proyecto
- 
+
+## Project Structure
+
 ```
 panel_lockers/
 renta_lockers/
 locker_logs/
 ```
- 
+
 ---
- 
-## Funcionamiento General
- 
-1. El alumno inicia sesión
-2. Entra a la fila virtual
-3. Redis administra la cola FIFO
-4. El alumno selecciona un locker
-5. La reserva se guarda en MySQL
-6. Los eventos se registran en JSON
+
+## General Workflow
+
+1. The student logs in
+2. Enters the virtual queue
+3. Redis manages the FIFO queue
+4. The student selects a locker
+5. The reservation is saved in MySQL
+6. Events are recorded in JSON
+
 ---
- 
-## Estados en Redis
- 
-| Clave | Descripción |
+
+## Redis Keys
+
+| Key | Description |
 |---|---|
-| `config:estado_sistema` | Estado global del sistema |
-| `contador:turno` | Contador de turnos asignados |
-| `locker` | Estado de los lockers |
-| `locker:seleccionando` | Locker en proceso de selección |
- 
+| `config:estado_sistema` | Global system state |
+| `contador:turno` | Assigned turn counter |
+| `locker` | Locker status |
+| `locker:seleccionando` | Locker being selected |
+
 ---
- 
+
 ## Logs
- 
-Los eventos del sistema se registran en formato JSON dentro de:
- 
+
+System events are recorded in JSON format inside:
+
 ```
 locker_logs/
 ```
- 
+
 ---
- 
-## Problemas Conocidos
- 
-- Problemas de permisos en Linux
-- Cola automática detenida
-- Archivos JSON sin permisos
+
+## Known Issues
+
+- Permission issues on Linux
+- Automatic queue stopped
+- JSON files without write permissions
  
