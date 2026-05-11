@@ -112,7 +112,7 @@ while (true)
         }
 
         $claveSeleccionando = 'locker:seleccionando';
-        $tiempoLimite = 120;
+        $tiempoLimite = 20;//Antorcha Deben ser 120
 
         // Obtener todos los alumnos en selección
         $seleccionando = $redis->hGetAll($claveSeleccionando);

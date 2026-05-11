@@ -8,13 +8,13 @@
 
 	if (isset($error_redis) && $error_redis) 
 	{
-		// Si hay error en Redis, no podemos proceder
+		// Error en Redis: adios
 		echo "Error en conexión a Redis: " . $error_redis;
 		exit;
 	}
 
 	/**
-	 * Convierte el número de estado a su descripción textual
+	 * Convertir el número de estado a su descripción textual
 	 */
 	function obtenerDescripcionEstado($estado)
 	{
@@ -64,7 +64,7 @@
 			}
 		}
 
-		// Preparar las columnas del Excel
+		// Columnas del Excel
 		$columnas = [
 			['Turno', 'Clave Única', 'Ape_pat', 'Ape_Mat','Nombres','Fecha y Hora de Entrada', 'Fecha y Hora de Asignación',  'Locker',  'Estado']
 		];

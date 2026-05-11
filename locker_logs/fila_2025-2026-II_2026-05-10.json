@@ -1,0 +1,51 @@
+[
+    {
+        "clvuni": "101",
+        "turno": 1,
+        "nombres": "Juan",
+        "ape_pat": "Guerrero",
+        "ape_mat": "Perez",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-05-10 14:49:49",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "202",
+        "turno": 2,
+        "nombres": "Maria",
+        "ape_pat": "Salvador",
+        "ape_mat": "Rodriguez",
+        "estado": 4,
+        "locker": "-",
+        "posicion_entrada": 0,
+        "fecha_hora_entrada": "2026-05-10 14:49:50",
+        "fecha_hora_asignacion": "-"
+    },
+    {
+        "clvuni": "303",
+        "turno": 3,
+        "nombres": "Andy",
+        "ape_pat": "Leon",
+        "ape_mat": "De la flor",
+        "estado": 3,
+        "locker": 4,
+        "posicion_entrada": 1,
+        "fecha_hora_entrada": "2026-05-10 14:50:01",
+        "fecha_hora_asignacion": "2026-05-10 14:50:48"
+    },
+    {
+        "clvuni": "101",
+        "turno": 5,
+        "nombres": "Juan",
+        "ape_pat": "Guerrero",
+        "ape_mat": "Perez",
+        "estado": 1,
+        "locker": "-",
+        "posicion_entrada": 1,
+        "fecha_hora_entrada": "2026-05-10 14:50:16",
+        "fecha_hora_asignacion": "-",
+        "fecha_hora_salida": "2026-05-10 14:52:09"
+    }
+]

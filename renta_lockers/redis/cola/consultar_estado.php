@@ -46,7 +46,7 @@ if ($clvuni)
         //Buscar al alumno en la fila de redis
         $clvuni_seguro = htmlspecialchars($clvuni);
         $claveSeleccionando = 'locker:seleccionando';
-        $tiempoLimite = 120;
+        $tiempoLimite = 20; //Antorcha Deben ser 120
 
         // Si el alumno ya está en selección, devolvemos el tiempo restante directamente
         $seleccionandoJson = $redis->hGet($claveSeleccionando, $clvuni_seguro);

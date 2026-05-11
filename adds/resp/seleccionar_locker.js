@@ -4,7 +4,7 @@
  */
 
 // Variables globales
-let tiempoRestante = 120; // 2 minutos
+let tiempoRestante = 20; // Antorcha 120 2 minutos
 let lockersSeleccionado = null;
 let lockersReservados = [];
 let clvuni = '';
